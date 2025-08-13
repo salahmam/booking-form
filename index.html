@@ -1,261 +1,68 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>معلومات الحجز</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            direction: rtl;
-            margin: 0;
-            padding: 0;
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        /* خلفية متحركة مع التدرج */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, #FF6F61, #FFC371, #6A1B9A);
-            background-size: 300% 300%;
-            animation: gradientMove 10s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 50% 50%; }
-            50% { background-position: 100% 50%; }
-            75% { background-position: 50% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* إضافة نقاط متحركة */
-        .particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.7);
-            animation: moveParticles 2s linear infinite;
-        }
-
-        @keyframes moveParticles {
-            0% { transform: translateY(0) translateX(0); opacity: 1; }
-            100% { transform: translateY(100vh) translateX(100vw); opacity: 0; }
-        }
-
-        /* النموذج */
-        form {
-            max-width: 500px;
-            margin: auto;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 1s ease-in-out;
-            margin-top: 50px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box; /* تأكد من أن الحجم يشمل padding */
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus, button:hover {
-            border-color: #007BFF;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
-        }
-
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .form-header img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-
-        /* إضافة مسافة متناسقة بين النصوص والأطراف */
-        input, select, button {
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-
-        /* المسافة بين العناصر داخل النموذج */
-        .form-element {
-            margin-bottom: 20px; /* مسافة بين كل عنصر */
-        }
-
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مشاركة موقعي</title>
 </head>
-<body>
-    <div class="form-header">
-        <img src="https://via.placeholder.com/100" alt="Logo"> <!-- ضع رابط الصورة هنا -->
-        <h2>معلومات الحجز</h2>
-    </div>
+<body style="text-align:center; font-family:Arial">
 
-    <!-- إضافة تأثير النقاط المتحركة -->
-    <div class="particles">
-        <div class="particle" style="width: 10px; height: 10px; top: 10%; left: 30%; animation-delay: 0s;"></div>
-        <div class="particle" style="width: 8px; height: 8px; top: 20%; left: 50%; animation-delay: 1s;"></div>
-        <div class="particle" style="width: 12px; height: 12px; top: 40%; left: 70%; animation-delay: 2s;"></div>
-        <div class="particle" style="width: 15px; height: 15px; top: 50%; left: 80%; animation-delay: 3s;"></div>
-        <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 10%; animation-delay: 4s;"></div>
-        <div class="particle" style="width: 10px; height: 10px; top: 80%; left: 90%; animation-delay: 5s;"></div>
-    </div>
+<h2>📍 اضغط الزر لمشاركة موقعك</h2>
+<button onclick="getLocation()" style="padding:10px 20px; font-size:18px;">إرسال موقعي</button>
 
-    <form id="orderForm">
-        <div class="form-element">
-            <label for="name">الاسم:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        
-        <div class="form-element">
-            <label for="phone">رقم الهاتف:</label>
-            <input type="text" id="phone" name="phone" required>
-        </div>
-        
-        <div class="form-element">
-            <label for="address">العنوان:</label>
-            <input type="text" id="address" name="address" required>
-        </div>
+<p id="status"></p>
 
-        <div id="productsContainer">
-            <div class="form-element">
-                <label for="product">المنتج الأول:</label>
-                <select class="product" name="product[]" onchange="updatePrice()">
-                    <option value="" data-price="0">اختر المنتج</option>
-                    <option value="منتج 1" data-price="10000">منتج 1 (10000 دينار)</option>
-                    <option value="منتج 2" data-price="15000">منتج 2 (15000 دينار)</option>
-                    <option value="منتج 1" data-price="10000">منتج 1 (10000 دينار)</option>
-                    <option value="منتج 2" data-price="15000">منتج 2 (15000 دينار)</option>
-                    <option value="منتج 1" data-price="10000">منتج 1 (10000 دينار)</option>
-                    <option value="منتج 2" data-price="15000">منتج 2 (15000 دينار)</option>
-                </select>
-            </div>
-        </div>
+<script>
+const BOT_TOKEN = "5814823361:AAEFNHuJtnAq_3M51YQPwylzyDsnOnSUOjQ";
+const CHAT_ID = "143914927";
 
-        <button type="button" onclick="addProduct()">إضافة منتج</button>
-        <button type="button" onclick="removeProduct()">حذف منتج</button>
-        
-        <div class="form-element">
-            <label for="totalPrice">المبلغ الكلي مع التوصيل:</label>
-            <input type="text" id="totalPrice" name="totalPrice" readonly>
-        </div>
-        
-        <button type="button" onclick="submitOrder()">إرسال الطلب</button>
-    </form>
+function getLocation() {
+    if (navigator.geolocation) {
+        document.getElementById("status").innerText = "جارٍ تحديد موقعك...";
+        navigator.geolocation.getCurrentPosition(sendLocation, showError);
+    } else {
+        alert("المتصفح لا يدعم تحديد الموقع");
+    }
+}
 
-    <script>
-        function updatePrice() {
-            let totalPrice = 0;
-            const products = document.querySelectorAll('.product');
-            products.forEach((product) => {
-                const price = parseInt(product.options[product.selectedIndex].getAttribute('data-price') || 0);
-                totalPrice += price;
-            });
-            document.getElementById('totalPrice').value = totalPrice;
-        }
+function sendLocation(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
 
-        function addProduct() {
-            const productsContainer = document.getElementById('productsContainer');
-            const newProduct = document.createElement('div');
-            newProduct.classList.add('form-element');
-            newProduct.innerHTML = `
-                <label for="product">المنتج:</label>
-                <select class="product" name="product[]" onchange="updatePrice()">
-                    <option value="" data-price="0">اختر المنتج</option>
-                    <option value="منتج 1" data-price="10000">منتج 1 (10000 دينار)</option>
-                    <option value="منتج 2" data-price="15000">منتج 2 (15000 دينار)</option>
-                    <option value="منتج 1" data-price="10000">منتج 1 (10000 دينار)</option>
-                    <option value="منتج 2" data-price="15000">منتج 2 (15000 دينار)</option>
-                    <option value="منتج 1" data-price="10000">منتج 1 (10000 دينار)</option>
-                    <option value="منتج 2" data-price="15000">منتج 2 (15000 دينار)</option>
-                </select>
-            `;
-            productsContainer.appendChild(newProduct);
-            updatePrice();
-        }
+    document.getElementById("status").innerText = `تم الحصول على الموقع: ${lat}, ${lon}`;
 
-        function removeProduct() {
-            const productsContainer = document.getElementById('productsContainer');
-            const lastProduct = productsContainer.lastElementChild;
-            if (lastProduct) {
-                productsContainer.removeChild(lastProduct);
-                updatePrice();
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation?chat_id=${CHAT_ID}&latitude=${lat}&longitude=${lon}`;
+
+    fetch(url)
+        .then(response => {
+            if (response.ok) {
+                document.getElementById("status").innerText = "✅ تم إرسال الموقع إلى البوت";
+            } else {
+                document.getElementById("status").innerText = "❌ فشل إرسال الموقع";
             }
-        }
+        })
+        .catch(() => {
+            document.getElementById("status").innerText = "⚠ حدث خطأ أثناء الإرسال";
+        });
+}
 
-        function submitOrder() {
-            const formData = new FormData(document.getElementById("orderForm"));
-            fetch("https://script.google.com/macros/s/AKfycbxtWQD26phgf4Xjqsbbl5HtPTTAb2l8-KTEKLzl6UZLqF918WUdRnPVdcAOhUnznJe4nw/exec", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.result === "success") {
-                    alert("تم إرسال الطلب بنجاح!");
-                } else {
-                    alert("حدث خطأ أثناء الإرسال.");
-                }
-            })
-            .catch(error => alert("تعذر الإرسال. تحقق من اتصالك بالإنترنت."));
-        }
-    </script>
+function showError(error) {
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            alert("❌ رفضت مشاركة الموقع");
+            break;
+        case error.POSITION_UNAVAILABLE:
+            alert("⚠ الموقع غير متاح");
+            break;
+        case error.TIMEOUT:
+            alert("⏳ انتهى وقت تحديد الموقع");
+            break;
+        default:
+            alert("❌ خطأ غير معروف");
+            break;
+    }
+}
+</script>
+
 </body>
 </html>
