@@ -1,75 +1,167 @@
-from pathlib import Path
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>سودوكو — مستويات متدرجة (ألوان يلا لودو)</title>
+  <style>
+    :root{
+      --bg: #0f0f12;
+      --card: #181a1f;
+      --ink: #e9eef6;
+      --muted: #aeb7c8;
+      --accent: #00d8ff;
+      --red: #ea3b2d;
+      --blue: #2f7bff;
+      --green: #27c93f;
+      --yellow: #ffcc00;
+      --cell: #1f232b;
+      --cell-focus: #263043;
+      --cell-border: #2f3644;
+      --ok: #2bd576;
+      --bad: #ff5d5d;
+      --btn: #202735;
+      --btn-hover: #2a3446;
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(255,0,0,.2), transparent 60%),
+        radial-gradient(1200px 600px at 110% 10%, rgba(0,255,0,.15), transparent 60%),
+        radial-gradient(1200px 600px at -10% 100%, rgba(0,0,255,.18), transparent 60%),
+        radial-gradient(1200px 600px at 120% 120%, rgba(255,215,0,.18), transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Tajawal", "Cairo", "Noto Kufi Arabic", system-ui, sans-serif;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+    }
+    header{ display: flex; justify-content: center; align-items: center; padding: 16px 12px; position: sticky; top: 0; backdrop-filter: blur(8px);}
+    .wrap{ width: min(1100px, 92vw); margin: 0 auto; }
+    .title{ display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;}
+    .badge{ padding: 6px 10px; font-weight: 700; border-radius: 10px; background: linear-gradient(135deg, var(--green), var(--yellow)); color: #102312;}
+    h1{ margin: 0; font-weight: 800; }
+    .hud{ display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-top: 14px;}
+    .controls{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    select, button{
+      background: var(--btn); border: 1px solid var(--cell-border); color: var(--ink);
+      padding: 10px 14px; border-radius: 12px; font-size: 16px; cursor: pointer;
+    }
+    button:hover, select:hover{ background: var(--btn-hover); }
+    .pill{ padding: 10px 14px; border-radius: 999px; border: 1px dashed var(--cell-border); color: var(--muted);}
+    .game{ display: grid; grid-template-columns: 1fr; justify-items: center; gap: 18px; margin: 8px 0 26px;}
+    .board{
+      width: min(92vw, 530px); aspect-ratio: 1/1; background: #10131a;
+      border-radius: 18px; padding: 12px;
+      display: grid; gap: 2px; position: relative; overflow: hidden;
+      grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr);
+    }
+    .cell{
+      display: grid; place-items: center; font-size: clamp(18px, 3.2vw, 26px);
+      font-weight: 800; background: var(--cell); border: 1px solid var(--cell-border);
+      border-radius: 9px; user-select: none; outline: none;
+    }
+    .cell[data-editable="true"]{ background: #1b2130; cursor: pointer;}
+    .cell[data-selected="true"]{ background: var(--cell-focus);}
+    .footer{ color: var(--muted); text-align: center; padding: 16px 10px 30px; font-size: 14px;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap title">
+      <span class="badge">سودوكو</span>
+      <h1>تحدّي الألوان — يلا لودو 🎲</h1>
+    </div>
+  </header>
 
-# إعادة تحميل الملف الأصلي بعد reset
-original_path = Path("/mnt/data/sudoku_yalla_levels.html")
-content = original_path.read_text(encoding="utf-8")
-
-# التعديلات:
-content = content.replace(
-    '<label for="stage">المستوى:</label>\n        <select id="stage" aria-label="اختيار المستوى"></select>',
-    '''<label for="levelSel">المستوى:</label>
-        <select id="levelSel" aria-label="اختيار المستوى"></select>
+  <main class="wrap">
+    <div class="hud">
+      <div class="controls">
+        <label for="levelSel">المستوى:</label>
+        <select id="levelSel"></select>
         <label for="stageSel">المرحلة:</label>
-        <select id="stageSel" aria-label="اختيار المرحلة"></select>'''
-)
+        <select id="stageSel"></select>
+        <span class="pill" id="status">جاهز</span>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="controls" style="justify-content: flex-end;">
+        <div style="min-width: 180px;">
+          <div class="progress" title="التقدّم"><div id="progressBar"></div></div>
+        </div>
+      </div>
+    </div>
 
-content = content.replace(
-    'div.dataset.editable = "true";',
-    'div.dataset.editable = "true";\n          div.setAttribute("inputmode","numeric");\n          div.setAttribute("pattern","[0-9]*");'
-)
+    <section class="game">
+      <div class="board" id="board" role="grid" aria-label="شبكة سودوكو"></div>
+      <div class="toolbar">
+        <button class="btn-cta" id="btnCheck">تحقّق</button>
+        <button class="btn-secondary" id="btnNext">التالي ⮕</button>
+        <button class="btn-danger" id="btnReset">إعادة</button>
+      </div>
+    </section>
+  </main>
 
-extra_js = """
-    let currentLevel = 1;
+  <footer class="footer">
+    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. الأرقام فقط. بالتوفيق! ✨
+  </footer>
 
+  <script>
+    const $ = s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
+    const boardEl=$("#board"), statusEl=$("#status"), progressEl=$("#progressBar"), timerEl=$("#timer");
+    const btnCheck=$("#btnCheck"), btnNext=$("#btnNext"), btnReset=$("#btnReset");
+    let SIDE=9, BOX=3, currentLevel=1, currentStage=1, initialBoard=[], solutionBoard=[];
+    function status(m){ statusEl.textContent=m; }
     function buildSelectors(){
-      // بناء قائمة المستويات (6 مستويات)
-      const levelSel = document.getElementById("levelSel");
-      levelSel.innerHTML = "";
-      for(let i=1;i<=6;i++){
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = `المستوى ${i}`;
-        levelSel.appendChild(opt);
-      }
-      // بناء قائمة المراحل (10 مراحل)
-      const stageSel = document.getElementById("stageSel");
-      stageSel.innerHTML = "";
-      for(let j=1;j<=10;j++){
-        const opt2 = document.createElement("option");
-        opt2.value = j;
-        opt2.textContent = `المرحلة ${j}`;
-        stageSel.appendChild(opt2);
-      }
-      levelSel.value = currentLevel;
-      stageSel.value = currentStage;
+      let lSel=$("#levelSel"), sSel=$("#stageSel"); lSel.innerHTML=""; sSel.innerHTML="";
+      for(let i=1;i<=6;i++){ let o=document.createElement("option"); o.value=i;o.textContent="المستوى "+i;lSel.appendChild(o);}
+      for(let j=1;j<=10;j++){ let o=document.createElement("option"); o.value=j;o.textContent="المرحلة "+j;sSel.appendChild(o);}
+      lSel.value=currentLevel; sSel.value=currentStage;
+      lSel.onchange=()=>newGame(+lSel.value,+sSel.value);
+      sSel.onchange=()=>newGame(+lSel.value,+sSel.value);
     }
-
-    function newGame(level, stage){
-      currentLevel = level;
-      currentStage = stage;
-      buildSelectors();
-      status(`تحميل المستوى ${level} — المرحلة ${stage}...`);
-      SIDE = 3+level; // المستوى1=4x4 ... المستوى6=9x9
-      BOX = Math.floor(Math.sqrt(SIDE));
-      const full = generateFull();
-      solutionBoard = full;
-      const blanks = blanksFor(stage);
-      initialBoard = removeCells(full, blanks);
-      buildBoard(initialBoard);
+    function pattern(r,c){ return (BOX*(r%BOX)+Math.floor(r/BOX)+c)%SIDE; }
+    function shuffle(a){ return a.sort(()=>Math.random()-.5);}
+    function generateFull(){
+      let nums=shuffle([...Array(SIDE).keys()].map(x=>x+1));
+      let board=Array.from({length:SIDE},(_,r)=>Array.from({length:SIDE},(_,c)=>nums[pattern(r,c)%SIDE]||1));
+      return board;
     }
-"""
-content = content.replace(
-    "// Init",
-    extra_js + "\n    // Init"
-)
-
-content = content.replace(
-    "newStage(1);",
-    "newGame(1,1);"
-)
-
-# حفظ الملف المعدل
-new_path = Path("/mnt/data/sudoku_yalla_levels_fixed.html")
-new_path.write_text(content, encoding="utf-8")
-
-new_path
+    function copyBoard(b){return b.map(r=>r.slice());}
+    function removeCells(b, blanks){
+      let a=copyBoard(b); let cells=shuffle([...Array(SIDE*SIDE).keys()]);
+      for(let i=0;i<blanks&&i<cells.length;i++){ let r=Math.floor(cells[i]/SIDE),c=cells[i]%SIDE;a[r][c]=0;}
+      return a;
+    }
+    function blanksFor(stage){ return 4+stage; }
+    function boxIndex(r,c){return Math.floor(r/BOX)*BOX+Math.floor(c/BOX);}
+    function buildBoard(puzzle){
+      boardEl.innerHTML=""; for(let r=0;r<SIDE;r++){for(let c=0;c<SIDE;c++){
+        let v=puzzle[r][c],d=document.createElement("div");
+        d.className="cell"; d.dataset.r=r;d.dataset.c=c;d.dataset.box=boxIndex(r,c);
+        if(v!==0){d.textContent=v; d.dataset.editable="false";}
+        else{d.dataset.editable="true"; d.setAttribute("inputmode","numeric"); d.setAttribute("pattern","[0-9]*");}
+        d.onclick=()=>selectCell(d); d.onkeydown=e=>handleKey(d,e);
+        boardEl.appendChild(d);
+      }}
+    }
+    let selected=null;
+    function selectCell(c){ if(selected)selected.dataset.selected="false"; selected=c; c.dataset.selected="true"; c.focus();}
+    function handleKey(c,e){ if(c.dataset.editable!=="true")return;
+      if(/[1-9]/.test(e.key)){c.textContent=e.key;}
+      if(e.key==="Backspace"||e.key==="Delete"||e.key==="0"){c.textContent="";}
+    }
+    function newGame(level,stage){
+      currentLevel=level; currentStage=stage; SIDE=3+level; BOX=Math.floor(Math.sqrt(SIDE));
+      solutionBoard=generateFull(); initialBoard=removeCells(solutionBoard,blanksFor(stage));
+      buildSelectors(); buildBoard(initialBoard); status("ابدأ اللعب!");
+    }
+    btnReset.onclick=()=>buildBoard(initialBoard);
+    btnNext.onclick=()=>{let ns=currentStage+1;if(ns>10){ns=1;currentLevel=currentLevel%6+1;} newGame(currentLevel,ns);}
+    btnCheck.onclick=()=>status("فحص بسيط (بدون تحقق كامل)");
+    newGame(1,1);
+  </script>
+</body>
+</html>
