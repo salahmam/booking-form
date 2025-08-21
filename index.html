@@ -1,98 +1,708 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>لعبة سودوكو</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>سودوكو — مستويات متدرجة (ألوان يلا لودو)</title>
   <style>
-    body {
-      font-family: "Tahoma", sans-serif;
+    :root{
+      --bg: #0f0f12;
+      --card: #181a1f;
+      --ink: #e9eef6;
+      --muted: #aeb7c8;
+      --accent: #00d8ff;
+      /* Yalla Ludo palette */
+      --red: #ea3b2d;
+      --blue: #2f7bff;
+      --green: #27c93f;
+      --yellow: #ffcc00;
+
+      --cell: #1f232b;
+      --cell-focus: #263043;
+      --cell-border: #2f3644;
+
+      --ok: #2bd576;
+      --bad: #ff5d5d;
+
+      --btn: #202735;
+      --btn-hover: #2a3446;
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin: 0;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(255,0,0,.2), transparent 60%),
+        radial-gradient(1200px 600px at 110% 10%, rgba(0,255,0,.15), transparent 60%),
+        radial-gradient(1200px 600px at -10% 100%, rgba(0,0,255,.18), transparent 60%),
+        radial-gradient(1200px 600px at 120% 120%, rgba(255,215,0,.18), transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Tajawal", "Cairo", "Noto Kufi Arabic", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+    }
+
+    header{
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      background: #f4f4f4;
+      padding: 16px 12px;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
     }
-    h1 {
-      color: #333;
+
+    .wrap{
+      width: min(1100px, 92vw);
+      margin: 0 auto;
     }
-    #controls {
-      margin: 15px;
+
+    .title{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
     }
-    select, button {
-      padding: 8px 12px;
-      margin: 5px;
+    .badge{
+      padding: 6px 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--green), var(--yellow));
+      color: #102312;
+      box-shadow: 0 6px 16px rgba(39,201,63,.32);
+    }
+    h1{
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: .3px;
+      text-shadow: 0 6px 30px rgba(0,0,0,.35);
+    }
+
+    .hud{
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .controls{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    select, button{
+      background: var(--btn);
+      border: 1px solid var(--cell-border);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 12px;
       font-size: 16px;
       cursor: pointer;
+      transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,.25);
     }
-    #board {
+    button:hover, select:hover{ background: var(--btn-hover); }
+    button:active{ transform: translateY(1px) scale(.99); }
+
+    .pill{
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px dashed var(--cell-border);
+      color: var(--muted);
+      font-weight: 600;
+      background: #161a21;
+    }
+
+    .game{
       display: grid;
-      margin: 20px auto;
-      border: 2px solid #333;
-      background: white;
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 18px;
+      margin: 8px 0 26px;
     }
-    .cell {
-      border: 1px solid #aaa;
-      text-align: center;
-      font-size: 20px;
-      width: 50px;
-      height: 50px;
+
+    .board{
+      width: min(92vw, 530px);
+      aspect-ratio: 1/1;
+      background: linear-gradient(180deg, #151821, #10131a);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow:
+        0 12px 30px rgba(0,0,0,.45),
+        inset 0 0 0 1px rgba(255,255,255,.03);
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      gap: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cell{
+      display: grid;
+      place-items: center;
+      font-size: clamp(18px, 3.2vw, 26px);
+      font-weight: 800;
+      background: var(--cell);
+      border: 1px solid var(--cell-border);
+      border-radius: 9px;
+      transition: background .15s ease, transform .07s ease, box-shadow .2s ease;
       outline: none;
+      caret-color: transparent;
+      user-select: none;
     }
-    .cell:focus {
-      background: #d0ebff;
+    .cell[data-editable="true"]{
+      background: #1b2130;
+      cursor: pointer;
     }
-    .prefilled {
-      background: #eee;
-      font-weight: bold;
+    .cell:focus-visible{
+      outline: 2px solid var(--accent);
+      box-shadow: 0 0 0 6px rgba(0,216,255,.08);
+    }
+    .cell[data-selected="true"]{
+      background: var(--cell-focus);
+      transform: scale(1.02);
+    }
+
+    /* thick borders for 3x3 boxes */
+    .cell[data-r="2"], .cell[data-r="5"]{ border-bottom: 2px solid var(--ink); }
+    .cell[data-c="2"], .cell[data-c="5"]{ border-right: 2px solid var(--ink); }
+
+    /* box coloring (Yalla Ludo vibe) */
+    .cell[data-box="0"], .cell[data-box="8"]{ background-image: linear-gradient(145deg, rgba(39,201,63,.10), rgba(39,201,63,.04)); }
+    .cell[data-box="1"], .cell[data-box="7"]{ background-image: linear-gradient(145deg, rgba(255,204,0,.10), rgba(255,204,0,.04)); }
+    .cell[data-box="2"], .cell[data-box="6"]{ background-image: linear-gradient(145deg, rgba(47,123,255,.12), rgba(47,123,255,.05)); }
+    .cell[data-box="3"], .cell[data-box="5"]{ background-image: linear-gradient(145deg, rgba(234,59,45,.12), rgba(234,59,45,.05)); }
+    .cell[data-box="4"]{ background-image: linear-gradient(145deg, rgba(0,216,255,.10), rgba(0,216,255,.04)); }
+
+    .legend{
+      display: grid;
+      grid-template-columns: repeat(5, max-content);
+      gap: 8px 14px;
+      align-items: center;
+      justify-content: center;
+    }
+    .dot{
+      width: 12px; height: 12px; border-radius: 50%;
+      display: inline-block; margin-inline-start: 4px;
+    }
+    .red{ background: var(--red); }
+    .blue{ background: var(--blue); }
+    .green{ background: var(--green); }
+    .yellow{ background: var(--yellow); }
+    .aqua{ background: var(--accent); }
+
+    .footer{
+      color: var(--muted);
+      text-align: center;
+      padding: 16px 10px 30px;
+      font-size: 14px;
+    }
+
+    /* animations */
+    @keyframes shake{
+      10%{ transform: translateX(-2px); }
+      20%{ transform: translateX(2px); }
+      30%{ transform: translateX(-2px); }
+      40%{ transform: translateX(2px); }
+      50%{ transform: translateX(-2px); }
+      60%{ transform: translateX(2px); }
+      100%{ transform: translateX(0); }
+    }
+    .shake{ animation: shake .35s linear both; }
+
+    @keyframes pop{
+      0%{ transform: scale(.9); }
+      100%{ transform: scale(1); }
+    }
+    .pop{ animation: pop .12s ease-out; }
+
+    .wrong{
+      background: linear-gradient(180deg, rgba(255,93,93,.15), rgba(255,93,93,.05));
+      border-color: rgba(255,93,93,.8) !important;
+    }
+
+    .correct{
+      background: linear-gradient(180deg, rgba(43,213,118,.18), rgba(43,213,118,.07));
+      border-color: rgba(43,213,118,.9) !important;
+    }
+
+    .toolbar{
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-cta{
+      background: linear-gradient(135deg, var(--green), var(--yellow));
+      color: #103313;
+      border: none;
+      font-weight: 800;
+      letter-spacing: .3px;
+      box-shadow: 0 10px 28px rgba(39,201,63,.35);
+    }
+    .btn-cta:hover{ filter: brightness(1.05); }
+    .btn-danger{
+      background: linear-gradient(135deg, #ff6a6a, #ea3b2d);
+      border: none;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 10px 28px rgba(234,59,45,.35);
+    }
+    .btn-secondary{
+      background: linear-gradient(135deg, #2f7bff, #00d8ff);
+      border: none;
+      color: #041225;
+      font-weight: 800;
+      box-shadow: 0 10px 28px rgba(47,123,255,.35);
+    }
+
+    .progress{
+      height: 10px;
+      background: #11151b;
+      border: 1px solid var(--cell-border);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .progress > div{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--accent));
+      transition: width .3s ease;
+    }
+
+    .timer{
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: .4px;
+    }
+
+    /* confetti canvas */
+    #confetti{
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px){
+      .legend{ grid-template-columns: repeat(3, max-content); }
     }
   </style>
 </head>
 <body>
-  <h1>🧩 لعبة سودوكو</h1>
+  <header>
+    <div class="wrap title">
+      <span class="badge">سودوكو</span>
+      <h1>تحدّي الألوان — يلا لودو 🎲</h1>
+    </div>
+  </header>
 
-  <div id="controls">
-    <label for="size">اختر المرحلة:</label>
-    <select id="size">
-      <option value="4">4 × 4 (سهل)</option>
-      <option value="6">6 × 6 (متوسط)</option>
-      <option value="9">9 × 9 (صعب)</option>
-    </select>
-    <button onclick="generateBoard()">ابدأ اللعبة</button>
-  </div>
+  <main class="wrap">
+    <div class="hud">
+      <div class="controls">
+        <label for="stage">المستوى:</label>
+        <select id="stage" aria-label="اختيار المستوى"></select>
+        <span class="pill" id="status">جاهز</span>
+      </div>
 
-  <div id="board"></div>
+      <div class="timer" id="timer">00:00</div>
+
+      <div class="controls" style="justify-content: flex-end;">
+        <div style="min-width: 180px;">
+          <div class="progress" title="التقدّم">
+            <div id="progressBar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="game">
+      <div class="board" id="board" role="grid" aria-label="شبكة سودوكو">
+        <canvas id="confetti"></canvas>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn-cta" id="btnCheck">تحقّق</button>
+        <button class="btn-secondary" id="btnNext">التالي ⮕</button>
+        <button class="btn-danger" id="btnReset">إعادة</button>
+      </div>
+
+      <div class="legend">
+        <span><span class="dot green"></span> مربعات 3×3 ملوّنة</span>
+        <span><span class="dot yellow"></span> خلية مبدئية</span>
+        <span><span class="dot blue"></span> تحديد الخلية</span>
+        <span><span class="dot aqua"></span> تلميحات الحالة</span>
+        <span><span class="dot red"></span> أخطاء</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
+  </footer>
 
   <script>
-    let boardEl = document.getElementById("board");
+    /************** Utilities **************/
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const boardEl = $("#board");
+    const stageSel = $("#stage");
+    const statusEl = $("#status");
+    const progressEl = $("#progressBar");
+    const timerEl = $("#timer");
+    const btnCheck = $("#btnCheck");
+    const btnNext = $("#btnNext");
+    const btnReset = $("#btnReset");
+    const confettiCanvas = $("#confetti");
+    const ctx = confettiCanvas.getContext("2d");
 
-    function generateBoard() {
-      let size = parseInt(document.getElementById("size").value);
-      boardEl.innerHTML = "";
-      boardEl.style.gridTemplateColumns = `repeat(${size}, 50px)`;
-      boardEl.style.gridTemplateRows = `repeat(${size}, 50px)`;
+    const SIDE = 9, BOX = 3;
+    let currentStage = 1;
+    let initialBoard = []; // with zeros for blanks
+    let solutionBoard = [];
+    let startTime = null, timerInt = null;
 
-      for (let i = 0; i < size * size; i++) {
-        let cell = document.createElement("input");
-        cell.type = "text";
-        cell.maxLength = 1;
-        cell.classList.add("cell");
+    function formatTime(sec){
+      const m = Math.floor(sec/60).toString().padStart(2,'0');
+      const s = (sec%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+    function startTimer(){
+      if(timerInt) clearInterval(timerInt);
+      startTime = Date.now();
+      timerInt = setInterval(()=>{
+        const elapsed = Math.floor((Date.now()-startTime)/1000);
+        timerEl.textContent = formatTime(elapsed);
+      }, 1000);
+    }
+    function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt = null; } }
 
-        // نضع أرقام عشوائية بسيطة كبداية (وليس سودوكو كامل)
-        if (Math.random() > 0.7) {
-          cell.value = Math.floor(Math.random() * size) + 1;
-          cell.disabled = true;
-          cell.classList.add("prefilled");
+    /************** Sudoku Gen/Solve **************/
+    function pattern(r,c){ return (BOX*(r%BOX) + Math.floor(r/BOX) + c) % SIDE; }
+    function shuffle(arr){
+      const a = [...arr];
+      for(let i=a.length-1; i>0; i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
+    function generateFull(){
+      const rBase = [0,1,2], rows = [].concat(...shuffle(rBase).map(g=>shuffle(rBase).map(r=>g*BOX+r)));
+      const cBase = [0,1,2], cols = [].concat(...shuffle(cBase).map(g=>shuffle(cBase).map(c=>g*BOX+c)));
+      const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+      const board = Array.from({length:SIDE}, (_,r)=>Array.from({length:SIDE}, (_,c)=> nums[pattern(rows[r], cols[c])]));
+      return board;
+    }
+
+    function copyBoard(b){ return b.map(row=>row.slice()); }
+
+    function removeCells(board, blanks){
+      const b = copyBoard(board);
+      let removed = 0;
+      const cells = shuffle([...Array(SIDE*SIDE).keys()]);
+      for(const idx of cells){
+        if(removed>=blanks) break;
+        const r = Math.floor(idx/SIDE), c = idx%SIDE;
+        const backup = b[r][c];
+        b[r][c] = 0;
+        removed++;
+      }
+      return b;
+    }
+
+    function isValidMove(board, r,c, num){
+      // row & col
+      for(let i=0;i<SIDE;i++){
+        if(board[r][i]===num && i!==c) return false;
+        if(board[i][c]===num && i!==r) return false;
+      }
+      // box
+      const br = Math.floor(r/BOX)*BOX;
+      const bc = Math.floor(c/BOX)*BOX;
+      for(let i=0;i<BOX;i++){
+        for(let j=0;j<BOX;j++){
+          const rr=br+i, cc=bc+j;
+          if(board[rr][cc]===num && (rr!==r || cc!==c)) return false;
         }
+      }
+      return true;
+    }
 
-        // السماح بإدخال أرقام فقط
-        cell.oninput = function () {
-          if (!/^[0-9]$/.test(cell.value)) {
-            cell.value = "";
+    function solveBoard(board){
+      const b = copyBoard(board);
+      function findEmpty(){
+        for(let r=0;r<SIDE;r++) for(let c=0;c<SIDE;c++) if(b[r][c]===0) return [r,c];
+        return null;
+      }
+      function backtrack(){
+        const pos = findEmpty();
+        if(!pos) return true;
+        const [r,c] = pos;
+        for(let n=1;n<=9;n++){
+          if(isValidMove(b, r,c, n)){
+            b[r][c]=n;
+            if(backtrack()) return true;
+            b[r][c]=0;
           }
-        };
+        }
+        return false;
+      }
+      return backtrack() ? b : null;
+    }
 
-        boardEl.appendChild(cell);
+    // difficulty scaling: from Stage 1..15 => blanks 35..60
+    function blanksFor(stage){
+      const s = Math.max(1, Math.min(15, stage));
+      const minBlanks = 35, maxBlanks = 60;
+      return Math.round(minBlanks + (maxBlanks-minBlanks) * ((s-1)/(15-1)));
+    }
+
+    /************** Rendering **************/
+    function boxIndex(r,c){ return Math.floor(r/3)*3 + Math.floor(c/3); }
+
+    function buildBoard(puzzle){
+      boardEl.innerHTML = "";
+      confettiResize();
+      for(let r=0;r<SIDE;r++){
+        for(let c=0;c<SIDE;c++){
+          const v = puzzle[r][c];
+          const div = document.createElement("div");
+          div.className = "cell";
+          div.tabIndex = 0;
+          div.dataset.r = r;
+          div.dataset.c = c;
+          div.dataset.box = boxIndex(r,c);
+          if(v!==0){
+            div.textContent = v;
+            div.dataset.editable = "false";
+            div.setAttribute("aria-readonly", "true");
+          }else{
+            div.dataset.editable = "true";
+            div.setAttribute("aria-readonly", "false");
+            div.textContent = "";
+          }
+          div.addEventListener("click", ()=> selectCell(div));
+          div.addEventListener("keydown", (e)=> handleKey(div, e));
+          boardEl.appendChild(div);
+        }
+      }
+      updateProgress();
+      status("ابدأ — املأ الشبكة!", "info");
+      startTimer();
+    }
+
+    function readBoardFromDOM(){
+      const b = Array.from({length:SIDE}, ()=>Array(SIDE).fill(0));
+      $$(".cell").forEach(cell=>{
+        const r = +cell.dataset.r, c = +cell.dataset.c;
+        const val = cell.textContent.trim();
+        b[r][c] = val ? +val : 0;
+      });
+      return b;
+    }
+
+    function writeBoardToDOM(board){
+      $$(".cell").forEach(cell=>{
+        const r = +cell.dataset.r, c = +cell.dataset.c;
+        const v = board[r][c];
+        cell.textContent = v===0? "" : v;
+      });
+    }
+
+    let selected = null;
+    function selectCell(cell){
+      if(selected) selected.dataset.selected = "false";
+      selected = cell;
+      selected.dataset.selected = "true";
+      selected.classList.add("pop");
+      setTimeout(()=> selected.classList.remove("pop"), 120);
+    }
+
+    function handleKey(cell, e){
+      const editable = cell.dataset.editable === "true";
+      if(!editable){
+        // allow arrows navigation
+        return navKeys(cell, e);
+      }
+      if(e.key>="1" && e.key<="9"){
+        cell.textContent = e.key;
+        cell.classList.remove("wrong");
+        cell.classList.add("pop");
+        updateProgress();
+      }else if(e.key==="Backspace" || e.key==="Delete" || e.key==="0"){
+        cell.textContent = "";
+        updateProgress();
+      }else{
+        navKeys(cell, e);
       }
     }
+
+    function navKeys(cell, e){
+      const r = +cell.dataset.r, c = +cell.dataset.c;
+      let rr=r, cc=c;
+      if(e.key==="ArrowUp"){ rr = Math.max(0, r-1); }
+      if(e.key==="ArrowDown"){ rr = Math.min(8, r+1); }
+      if(e.key==="ArrowLeft"){ cc = Math.max(0, c-1); }
+      if(e.key==="ArrowRight"){ cc = Math.min(8, c+1); }
+      if(rr!==r || cc!==c){
+        e.preventDefault();
+        const next = $(`.cell[data-r="${rr}"][data-c="${cc}"]`);
+        if(next){ next.focus(); selectCell(next); }
+      }
+    }
+
+    /************** Validation **************/
+    function checkBoard(){
+      // clear marks
+      $$(".cell").forEach(c=> c.classList.remove("wrong","correct"));
+      const b = readBoardFromDOM();
+      let complete = true, ok = true;
+
+      for(let r=0;r<SIDE;r++){
+        for(let c=0;c<SIDE;c++){
+          const val = b[r][c];
+          const cell = $(`.cell[data-r="${r}"][data-c="${c}"]`);
+          if(val===0){ complete = false; continue; }
+          if(!isValidMove(b, r,c,val)){
+            ok = false;
+            cell.classList.add("wrong", "shake");
+            setTimeout(()=> cell.classList.remove("shake"), 400);
+          }
+        }
+      }
+
+      if(!ok){
+        status("هناك أخطاء — حاول مرة أخرى", "bad");
+        return;
+      }
+
+      if(complete){
+        status("ممتاز! حل صحيح ✅", "ok");
+        celebrate();
+        stopTimer();
+        // lock all
+        $$(".cell").forEach(c=> c.dataset.editable="false");
+      }else{
+        status("صحيح حتى الآن — أكمل الباقي", "ok");
+      }
+    }
+
+    function updateProgress(){
+      const b = readBoardFromDOM();
+      const filled = b.flat().filter(x=>x!==0).length;
+      const total = SIDE*SIDE - initialBoard.flat().filter(x=>x!==0).length;
+      const current = Math.max(0, filled - initialBoard.flat().filter(x=>x!==0).length);
+      const pct = Math.max(0, Math.min(100, Math.round((current/total)*100)));
+      progressEl.style.width = pct + "%";
+    }
+
+    function status(msg, kind="info"){
+      statusEl.textContent = msg;
+      statusEl.style.borderColor = {
+        info: "var(--cell-border)",
+        ok: "var(--ok)",
+        bad: "var(--bad)"
+      }[kind] || "var(--cell-border)";
+      statusEl.style.color = {
+        info: "var(--muted)",
+        ok: "#2bd576",
+        bad: "#ff8a8a"
+      }[kind] || "var(--muted)";
+    }
+
+    /************** Confetti **************/
+    let confettiPieces = [];
+    function confettiResize(){
+      confettiCanvas.width = boardEl.clientWidth;
+      confettiCanvas.height = boardEl.clientHeight;
+    }
+    function spawnConfetti(n=120){
+      const colors = ["#27c93f","#ffcc00","#2f7bff","#ea3b2d","#00d8ff"];
+      confettiPieces = Array.from({length:n}, ()=> ({
+        x: Math.random()*confettiCanvas.width,
+        y: -10 - Math.random()*40,
+        r: 2 + Math.random()*4,
+        c: colors[Math.floor(Math.random()*colors.length)],
+        v: 1 + Math.random()*2.5,
+        w: Math.random()*1.5,
+        a: Math.random()*Math.PI*2
+      }));
+    }
+    function drawConfetti(){
+      ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+      for(const p of confettiPieces){
+        p.a += 0.05;
+        p.y += p.v;
+        p.x += Math.sin(p.a)*p.w;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = p.c;
+        ctx.fill();
+      }
+      confettiPieces = confettiPieces.filter(p=> p.y < confettiCanvas.height+10);
+      if(confettiPieces.length){
+        requestAnimationFrame(drawConfetti);
+      }
+    }
+    function celebrate(){
+      spawnConfetti(160);
+      drawConfetti();
+    }
+
+    /************** Stage Management **************/
+    function buildStageSelector(){
+      stageSel.innerHTML = "";
+      for(let i=1;i<=15;i++){
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `مرحلة ${i}`;
+        stageSel.appendChild(opt);
+      }
+      stageSel.value = currentStage;
+    }
+
+    function newStage(stage){
+      currentStage = stage;
+      buildStageSelector();
+      status(`تحميل المرحلة ${stage}...`);
+      const full = generateFull();
+      solutionBoard = full;
+      const blanks = blanksFor(stage);
+      initialBoard = removeCells(full, blanks);
+      buildBoard(initialBoard);
+    }
+
+    function resetStage(){
+      writeBoardToDOM(initialBoard);
+      status("تمت الإعادة — جرّب من جديد");
+      startTimer();
+      progressEl.style.width = "0%";
+    }
+
+    btnCheck.addEventListener("click", checkBoard);
+    btnNext.addEventListener("click", ()=>{
+      const next = currentStage >= 15 ? 1 : currentStage+1;
+      newStage(next);
+    });
+    btnReset.addEventListener("click", resetStage);
+    stageSel.addEventListener("change", (e)=>{
+      newStage(+e.target.value);
+    });
+
+    window.addEventListener("resize", confettiResize);
+
+    // Init
+    newStage(1);
   </script>
 </body>
 </html>
