@@ -108,7 +108,7 @@
 
       for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
-          const cell = document.createElement("input");
+          const cell = document.createElement("text");
           cell.type = "text";
           cell.maxLength = 1;
           cell.classList.add("cell");
@@ -121,7 +121,7 @@
           }
 
           // سماح فقط بأرقام من 1 إلى 9
-          cell.addEventListener("input", (e) => {
+          cell.addEventListener("text", (e) => {
             const val = e.target.value;
             if (!/^[1-9]$/.test(val)) {
               e.target.value = "";
