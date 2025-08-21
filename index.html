@@ -1,237 +1,163 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>لعبة سودوكو</title>
+  <title>تحدي الألوان — يلا لودو</title>
   <style>
     body {
-      font-family: "Tahoma", sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: linear-gradient(135deg, #ffcc00, #ff0066, #00ccff, #33cc33);
-      background-size: 400% 400%;
-      animation: gradientBG 10s ease infinite;
-      min-height: 100vh;
+      font-family: "Cairo", sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: white;
+      text-align: center;
       margin: 0;
-    }
-    @keyframes gradientBG {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
+      padding: 0;
     }
     h1 {
-      color: white;
-      margin-top: 20px;
-      text-shadow: 2px 2px 4px #000;
-    }
-    #controls {
-      margin: 15px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    select, button {
-      padding: 10px 15px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
+      margin: 10px 0;
+      font-size: 26px;
+      font-weight: bold;
     }
     #board {
       display: grid;
+      grid-template-columns: repeat(9, 40px);
+      grid-template-rows: repeat(9, 40px);
+      gap: 2px;
       margin: 20px auto;
-      border: 3px solid #333;
-      background: white;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      width: max-content;
+      background: #222;
+      padding: 10px;
+      border-radius: 8px;
     }
     .cell {
-      border: 1px solid #aaa;
+      width: 40px;
+      height: 40px;
       text-align: center;
-      font-size: 20px;
-      width: 50px;
-      height: 50px;
+      font-size: 18px;
+      border: 1px solid #444;
+      background: #111;
+      color: white;
       outline: none;
-      transition: background 0.2s;
     }
     .cell:focus {
-      background: #d0ebff;
+      border: 2px solid #00f;
     }
-    .prefilled {
-      background: #eee;
+    .fixed {
+      background: #f1c40f;
       font-weight: bold;
     }
-    .error {
-      background: #ffcccc !important;
-      animation: shake 0.3s;
+    #controls {
+      margin: 15px 0;
     }
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-3px); }
-      50% { transform: translateX(3px); }
-      75% { transform: translateX(-3px); }
-      100% { transform: translateX(0); }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
     }
-    #status {
-      color: white;
+    .check { background: linear-gradient(45deg,#27ae60,#2ecc71); color: #fff; }
+    .next { background: linear-gradient(45deg,#2980b9,#3498db); color: #fff; }
+    .reset { background: linear-gradient(45deg,#e74c3c,#c0392b); color: #fff; }
+    .new   { background: linear-gradient(45deg,#8e44ad,#9b59b6); color: #fff; }
+    #timer {
+      margin: 10px 0;
       font-size: 18px;
-      margin: 10px;
-      text-shadow: 1px 1px 3px #000;
     }
-    /* 📢 مكان للإعلانات */
     #ads {
-      width: 90%;
-      max-width: 728px;
-      height: 90px;
       margin: 20px auto;
-      background: #fff;
-      border-radius: 8px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      background: #fff3;
+      padding: 10px;
+      width: 80%;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
-  <h1>🧩 لعبة سودوكو</h1>
-
-  <div id="controls">
-    <label for="level">اختر المرحلة:</label>
-    <select id="level">
-      <option value="9">9 × 9</option>
-    </select>
-    <button onclick="generateBoard()">ابدأ اللعبة</button>
-    <button onclick="checkBoard()">تحقق</button>
-    <button onclick="resetBoard()">إعادة</button>
-    <button onclick="nextLevel()">التالي</button>
-    <button onclick="resetProgress()">بدء جديد</button>
-  </div>
-
-  <div id="status">
-    <span id="stage">المرحلة: 1 / 15</span> | 
-    <span id="timer">⏱️ 00:00</span>
-  </div>
-
+  <h1>🎲 تحدي الألوان — يلا لودو</h1>
+  <div id="timer">⏱️ 00:00</div>
+  <div id="stage">المرحلة: 1 / 15</div>
+  
   <div id="board"></div>
 
-  <!-- 📢 إعلان (AdSense) -->
-  <div id="ads">
-    <p>🔸 هنا يظهر إعلان Google AdSense 🔸</p>
+  <div id="controls">
+    <button class="check" onclick="checkBoard()">تحقق</button>
+    <button class="next" onclick="nextLevel()">التالي</button>
+    <button class="reset" onclick="resetBoard()">إعادة</button>
+    <button class="new" onclick="resetProgress()">بدء جديد</button>
   </div>
 
+  <div id="ads">🔶 هنا يظهر إعلان Google AdSense 🔶</div>
+
   <script>
-    let boardEl = document.getElementById("board");
-    let savedBoard = [];
-    let currentLevel = 9;
+    let board = document.getElementById("board");
+    let timerElement = document.getElementById("timer");
+    let stageElement = document.getElementById("stage");
+    let timer;
+    let seconds = 0;
     let currentStage = 1;
-    let maxStages = 15;
-    let timerEl = document.getElementById("timer");
-    let stageEl = document.getElementById("stage");
-    let timer, seconds = 0;
+    const totalStages = 15;
 
     function startTimer() {
       clearInterval(timer);
       timer = setInterval(() => {
         seconds++;
-        let min = String(Math.floor(seconds / 60)).padStart(2, "0");
-        let sec = String(seconds % 60).padStart(2, "0");
-        timerEl.textContent = `⏱️ ${min}:${sec}`;
+        let min = String(Math.floor(seconds / 60)).padStart(2, '0');
+        let sec = String(seconds % 60).padStart(2, '0');
+        timerElement.textContent = `⏱️ ${min}:${sec}`;
         saveProgress();
       }, 1000);
     }
 
-    function generateBoard(load = false) {
-      let size = parseInt(document.getElementById("level").value);
-      currentLevel = size;
-      boardEl.innerHTML = "";
-      boardEl.style.gridTemplateColumns = `repeat(${size}, 50px)`;
-      boardEl.style.gridTemplateRows = `repeat(${size}, 50px)`;
-      savedBoard = [];
-      startTimer();
-      stageEl.textContent = `المرحلة: ${currentStage} / ${maxStages}`;
-
-      for (let r = 0; r < size; r++) {
-        savedBoard[r] = [];
-        for (let c = 0; c < size; c++) {
-          let cell = document.createElement("input");
-          cell.type = "text";
-          cell.maxLength = 1;
-          cell.classList.add("cell");
-
-          if (Math.random() > 0.75) {
-            let num = Math.floor(Math.random() * size) + 1;
-            cell.value = num;
-            cell.disabled = true;
-            cell.classList.add("prefilled");
-            savedBoard[r][c] = num;
-          } else {
-            savedBoard[r][c] = 0;
-          }
-
-          cell.oninput = function () {
-            if (!/^[1-9]$/.test(cell.value)) {
-              cell.value = "";
-            }
-            saveProgress();
-          };
-
-          boardEl.appendChild(cell);
-        }
+    function generateBoard() {
+      board.innerHTML = "";
+      for (let i = 0; i < 81; i++) {
+        let input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 1;
+        input.classList.add("cell");
+        input.oninput = () => {
+          input.value = input.value.replace(/[^1-9]/g, "");
+          saveProgress();
+        };
+        board.appendChild(input);
       }
-      if (load) loadProgress();
+      stageElement.textContent = `المرحلة: ${currentStage} / ${totalStages}`;
+      startTimer();
+      loadProgress();
+    }
+
+    function checkBoard() {
+      alert("✔️ التحقق من الحل ليس مفعلاً بعد (يمكن تطويره لاحقاً).");
+    }
+
+    function nextLevel() {
+      if (currentStage < totalStages) {
+        currentStage++;
+        seconds = 0;
+        generateBoard();
+        saveProgress();
+      } else {
+        alert("🎉 أنهيت جميع المراحل!");
+      }
     }
 
     function resetBoard() {
       generateBoard();
-      saveProgress();
     }
 
-    function nextLevel() {
-      if (currentStage < maxStages) {
-        currentStage++;
-        generateBoard();
-        saveProgress();
-      } else {
-        alert("🎉 أنهيت كل المراحل!");
-      }
-    }
-
-    function checkBoard() {
-      let cells = boardEl.querySelectorAll(".cell");
-      let size = currentLevel;
-      let valid = true;
-
-      for (let i = 0; i < cells.length; i++) {
-        let val = cells[i].value;
-        if (val !== "" && parseInt(val) > size) {
-          cells[i].classList.add("error");
-          setTimeout(() => cells[i].classList.remove("error"), 400);
-          valid = false;
-        }
-      }
-      if (valid) {
-        alert("✅ ممتاز! لا يوجد أخطاء واضحة.");
-      } else {
-        alert("❌ يوجد بعض الأخطاء.");
-      }
+    function resetProgress() {
+      localStorage.removeItem("sudoku-progress");
+      currentStage = 1;
+      seconds = 0;
+      generateBoard();
+      alert("🔄 تم البدء من جديد!");
     }
 
     function saveProgress() {
-      let cells = boardEl.querySelectorAll(".cell");
-      let values = Array.from(cells).map(cell => cell.value);
-      localStorage.setItem("sudoku-progress", JSON.stringify({
-        stage: currentStage,
-        level: currentLevel,
-        seconds: seconds,
-        board: values
-      }));
+      let cells = [...document.querySelectorAll(".cell")].map(c => c.value);
+      let progress = { stage: currentStage, time: seconds, cells: cells };
+      localStorage.setItem("sudoku-progress", JSON.stringify(progress));
     }
 
     function loadProgress() {
@@ -239,29 +165,14 @@
       if (data) {
         let progress = JSON.parse(data);
         currentStage = progress.stage;
-        currentLevel = progress.level;
-        seconds = progress.seconds;
-        stageEl.textContent = `المرحلة: ${currentStage} / ${maxStages}`;
-        let cells = boardEl.querySelectorAll(".cell");
-        progress.board.forEach((val, i) => {
-          if (val !== "" && !cells[i].disabled) {
-            cells[i].value = val;
-          }
-        });
+        seconds = progress.time;
+        stageElement.textContent = `المرحلة: ${currentStage} / ${totalStages}`;
+        let cells = document.querySelectorAll(".cell");
+        progress.cells.forEach((val, i) => { cells[i].value = val; });
       }
     }
 
-    function resetProgress() {
-      localStorage.removeItem("sudoku-progress");
-      currentStage = 1;
-      seconds = 0;
-      alert("✅ تم مسح التقدم! ستبدأ من جديد");
-      generateBoard();
-    }
-
-    window.onload = () => {
-      generateBoard(true);
-    };
+    generateBoard();
   </script>
 </body>
 </html>
