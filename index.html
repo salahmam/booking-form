@@ -3,53 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تحدي الألوان — يلا لودو</title>
+  <title>تحدي الألوان - يلا لودو</title>
   <style>
     body {
-      margin: 0;
-      font-family: "Tahoma", sans-serif;
-      background: linear-gradient(135deg, #0f0f0f, #111);
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #111, #222);
       color: #fff;
       text-align: center;
-    }
-
-    header {
-      padding: 20px;
+      margin: 0;
+      padding: 0;
     }
 
     h1 {
-      font-size: 22px;
-      margin: 10px 0;
-    }
-
-    .controls {
       margin: 15px 0;
+      font-size: 24px;
     }
-
-    button {
-      padding: 10px 15px;
-      margin: 5px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    .check { background: #2ecc71; color: #fff; }
-    .next { background: #3498db; color: #fff; }
-    .reset { background: #e74c3c; color: #fff; }
-    .save { background: #f1c40f; color: #000; }
 
     #sudoku-board {
       display: grid;
       grid-template-columns: repeat(9, 1fr);
       gap: 2px;
-      margin: 20px auto;
+      margin: 15px auto;
       width: 90%;
       max-width: 450px;
     }
@@ -74,63 +48,60 @@
       color: #ff0;
     }
 
-    .ads-banner {
-      margin: 20px auto;
-      padding: 10px;
-      background: #222;
-      border: 1px dashed #666;
-      color: #aaa;
-      width: 80%;
-      border-radius: 8px;
+    .buttons {
+      margin: 20px 0;
     }
 
-    footer {
-      margin: 15px;
-      font-size: 13px;
-      color: #999;
+    button {
+      margin: 5px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .check { background: linear-gradient(45deg, #00c853, #64dd17); color: #fff; }
+    .next { background: linear-gradient(45deg, #2962ff, #448aff); color: #fff; }
+    .reset { background: linear-gradient(45deg, #d50000, #ff1744); color: #fff; }
+    .save  { background: linear-gradient(45deg, #ff9100, #ff6d00); color: #fff; }
+
+    #ad-banner {
+      margin: 20px auto;
+      background: #fff3;
+      color: #ff0;
+      padding: 12px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🎲 تحدي الألوان — يلا لودو</h1>
-    <div>المرحلة: <span id="stage">1</span> / 15 | ⏱ <span id="timer">00:00</span></div>
-  </header>
-
-  <div class="controls">
-    <button class="check" onclick="checkBoard()">تحقّق</button>
-    <button class="next" onclick="nextStage()">التالي ➡</button>
-    <button class="reset" onclick="resetBoard()">إعادة</button>
-    <button class="save" onclick="saveProgress()">💾 حفظ التقدم</button>
-  </div>
+  <h1>🎲 تحدي الألوان — يلا لودو</h1>
 
   <div id="sudoku-board"></div>
 
-  <div class="ads-banner">
+  <div class="buttons">
+    <button class="check" onclick="checkBoard()">تحقّق</button>
+    <button class="next" onclick="nextLevel()">التالي ➡️</button>
+    <button class="reset" onclick="resetBoard()">إعادة 🔄</button>
+    <button class="save" onclick="saveProgress()">💾 حفظ التقدم</button>
+  </div>
+
+  <div id="ad-banner">
     🔶 هنا يظهر إعلان Google AdSense 🔶
   </div>
 
-  <footer>
-    صنع بحب ❤️
-  </footer>
-
   <script>
-    let stage = 1;
-    let timerInterval;
-    let seconds = 0;
-
-    function startTimer() {
-      clearInterval(timerInterval);
-      seconds = 0;
-      timerInterval = setInterval(() => {
-        seconds++;
-        let mins = String(Math.floor(seconds / 60)).padStart(2, "0");
-        let secs = String(seconds % 60).padStart(2, "0");
-        document.getElementById("timer").textContent = `${mins}:${secs}`;
-      }, 1000);
-    }
-
     function generateBoard() {
       const board = document.getElementById("sudoku-board");
       board.innerHTML = "";
@@ -142,14 +113,14 @@
           cell.maxLength = 1;
           cell.classList.add("cell");
 
-          // عشوائي: بعض الخلايا جاهزة
+          // 30% خلية ثابتة (قيمة مبدئية)
           if (Math.random() > 0.7) {
             cell.value = Math.floor(Math.random() * 9) + 1;
             cell.disabled = true;
             cell.classList.add("fixed");
           }
 
-          // منع أي شي غير 1-9
+          // سماح فقط بأرقام من 1 إلى 9
           cell.addEventListener("input", (e) => {
             const val = e.target.value;
             if (!/^[1-9]$/.test(val)) {
@@ -160,55 +131,40 @@
           board.appendChild(cell);
         }
       }
-      startTimer();
+    }
+
+    function checkBoard() {
+      alert("✅ التحقق من الحل ليس مفعّل بعد (ممكن أضيفه لك لاحقاً).");
+    }
+
+    function nextLevel() {
+      generateBoard();
     }
 
     function resetBoard() {
       generateBoard();
     }
 
-    function nextStage() {
-      if (stage < 15) {
-        stage++;
-        document.getElementById("stage").textContent = stage;
-        generateBoard();
-      } else {
-        alert("🎉 مبروك! أنهيت كل المراحل.");
-      }
-    }
-
-    function checkBoard() {
-      alert("✅ تم التحقق (تقدر تطور الخوارزمية لاحقًا).");
-    }
-
     function saveProgress() {
       const cells = document.querySelectorAll(".cell");
       let values = [];
-      cells.forEach(c => values.push(c.value));
-      localStorage.setItem("sudoku-progress", JSON.stringify({
-        stage, values, seconds
-      }));
-      alert("💾 تم حفظ التقدم بنجاح!");
+      cells.forEach(cell => values.push(cell.value));
+      localStorage.setItem("sudokuProgress", JSON.stringify(values));
+      alert("💾 تم حفظ التقدّم بنجاح!");
     }
 
     function loadProgress() {
-      const data = localStorage.getItem("sudoku-progress");
-      if (data) {
-        const saved = JSON.parse(data);
-        stage = saved.stage;
-        seconds = saved.seconds;
-        document.getElementById("stage").textContent = stage;
-        generateBoard();
+      const saved = localStorage.getItem("sudokuProgress");
+      if (saved) {
+        const values = JSON.parse(saved);
         const cells = document.querySelectorAll(".cell");
-        saved.values.forEach((val, i) => {
-          cells[i].value = val;
-        });
-      } else {
-        generateBoard();
+        values.forEach((val, i) => cells[i].value = val);
       }
     }
 
-    window.onload = loadProgress;
+    // تشغيل عند فتح الصفحة
+    generateBoard();
+    setTimeout(loadProgress, 300);
   </script>
 </body>
 </html>
