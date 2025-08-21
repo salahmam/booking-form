@@ -396,36 +396,7 @@
       }
       return a;
     }
-    function generateBoard() {
-  const board = document.getElementById("sudoku-board");
-  board.innerHTML = "";
-
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
-      const cell = document.createElement("input");
-      cell.type = "text";
-      cell.maxLength = 1; // فقط رقم واحد
-      cell.classList.add("cell");
-
-      // خلية مبدئية (قيمة جاهزة)
-      if (Math.random() > 0.7) {
-        cell.value = Math.floor(Math.random() * 9) + 1;
-        cell.disabled = true;
-        cell.classList.add("fixed");
-      }
-
-      // سماح فقط بأرقام 1-9
-      cell.addEventListener("input", (e) => {
-        const val = e.target.value;
-        if (!/^[1-9]$/.test(val)) {
-          e.target.value = "";
-        }
-      });
-
-      board.appendChild(cell);
-    }
-  }
-}
+   
     function generateFull(){
       const rBase = [0,1,2], rows = [].concat(...shuffle(rBase).map(g=>shuffle(rBase).map(r=>g*BOX+r)));
       const cBase = [0,1,2], cols = [].concat(...shuffle(cBase).map(g=>shuffle(cBase).map(c=>g*BOX+c)));
@@ -506,7 +477,7 @@
       for(let r=0;r<SIDE;r++){
         for(let c=0;c<SIDE;c++){
           const v = puzzle[r][c];
-          const div = document.createElement("div");
+          const text = document.createElement("text");
           div.className = "cell";
           div.tabIndex = 0;
           div.dataset.r = r;
@@ -523,7 +494,7 @@
           }
           div.addEventListener("click", ()=> selectCell(div));
           div.addEventListener("keydown", (e)=> handleKey(div, e));
-          boardEl.appendChild(div);
+          boardEl.appendChild(text);
         }
       }
       updateProgress();
