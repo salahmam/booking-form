@@ -15,10 +15,21 @@
     }
     h1 {
       color: #333;
-      margin: 20px;
+      margin: 15px;
+    }
+    #top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 80%;
+      max-width: 500px;
+      margin: 10px auto;
+      font-size: 18px;
+      color: #444;
+      font-weight: bold;
     }
     #controls {
-      margin: 15px;
+      margin: 10px;
     }
     select, button {
       padding: 8px 14px;
@@ -39,7 +50,7 @@
     }
     #board {
       display: grid;
-      margin: 20px auto;
+      margin: 15px auto;
       border: 3px solid #333;
       background: white;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -80,7 +91,7 @@
       font-size: 14px;
       color: #666;
     }
-    /* 📌 تنسيقات ألوان شبيهة بلودو */
+    /* 📌 ألوان مقسمة مثل لودو */
     .region-1 { background: #ffe6e6; }
     .region-2 { background: #e6f7ff; }
     .region-3 { background: #e6ffe6; }
@@ -93,18 +104,24 @@
 
     /* 📌 بنر الإعلانات */
     .ads-banner {
-      margin: 15px auto;
+      margin: 10px auto;
       text-align: center;
     }
   </style>
-  <!-- ✅ كود Google Ads (استبدل ca-pub-XXXXXX بالمعرف الخاص بك) -->
+  <!-- ✅ كود Google Ads (استبدل ca-pub-XXXXXX بمعرفك) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXX"
      crossorigin="anonymous"></script>
 </head>
 <body>
   <h1>🧩 لعبة سودوكو</h1>
 
-  <!-- 📌 مكان إعلان علوي -->
+  <!-- 📌 أعلى اللعبة (مؤقّت + عداد مراحل) -->
+  <div id="top-bar">
+    <div id="timer">⏱️ 00:00</div>
+    <div id="stage">المرحلة: 1 / 15</div>
+  </div>
+
+  <!-- 📌 إعلان علوي -->
   <div class="ads-banner">
     <ins class="adsbygoogle"
          style="display:block"
@@ -115,11 +132,11 @@
   </div>
 
   <div id="controls">
-    <label for="level">اختر المرحلة:</label>
+    <label for="level">اختر الحجم:</label>
     <select id="level">
-      <option value="4">4 × 4 (سهل)</option>
-      <option value="6">6 × 6 (متوسط)</option>
-      <option value="9">9 × 9 (صعب)</option>
+      <option value="4">4 × 4</option>
+      <option value="6">6 × 6</option>
+      <option value="9" selected>9 × 9</option>
     </select>
     <button onclick="generateBoard()">ابدأ</button>
     <button onclick="checkBoard()">تحقق</button>
@@ -129,7 +146,7 @@
 
   <div id="board"></div>
 
-  <!-- 📌 مكان إعلان سفلي -->
+  <!-- 📌 إعلان سفلي -->
   <div class="ads-banner">
     <ins class="adsbygoogle"
          style="display:block"
@@ -144,7 +161,23 @@
   <script>
     let boardEl = document.getElementById("board");
     let savedBoard = [];
-    let currentLevel = 4;
+    let currentLevel = 9;
+    let currentStage = 1;
+    let maxStages = 15;
+    let timerEl = document.getElementById("timer");
+    let stageEl = document.getElementById("stage");
+    let timer, seconds = 0;
+
+    function startTimer() {
+      clearInterval(timer);
+      seconds = 0;
+      timer = setInterval(() => {
+        seconds++;
+        let min = String(Math.floor(seconds / 60)).padStart(2, "0");
+        let sec = String(seconds % 60).padStart(2, "0");
+        timerEl.textContent = `⏱️ ${min}:${sec}`;
+      }, 1000);
+    }
 
     function generateBoard() {
       let size = parseInt(document.getElementById("level").value);
@@ -153,6 +186,8 @@
       boardEl.style.gridTemplateColumns = `repeat(${size}, 50px)`;
       boardEl.style.gridTemplateRows = `repeat(${size}, 50px)`;
       savedBoard = [];
+      startTimer();
+      stageEl.textContent = `المرحلة: ${currentStage} / ${maxStages}`;
 
       for (let r = 0; r < size; r++) {
         savedBoard[r] = [];
@@ -162,11 +197,10 @@
           cell.maxLength = 1;
           cell.classList.add("cell");
 
-          // 📌 تلوين المناطق مثل سودوكو
+          // تلوين المناطق 9x9
           let regionClass = "region-" + (((Math.floor(r / 3) * 3) + Math.floor(c / 3)) + 1);
           if (size === 9) cell.classList.add(regionClass);
 
-          // نملأ بعض الخانات كبداية
           if (Math.random() > 0.75) {
             let num = Math.floor(Math.random() * size) + 1;
             cell.value = num;
@@ -177,22 +211,18 @@
             savedBoard[r][c] = 0;
           }
 
-          // إدخال أرقام فقط
           cell.oninput = function () {
             if (!/^[1-9]$/.test(cell.value)) {
               cell.value = "";
             }
           };
 
-          // عند التركيز يميز الصف والعمود
           cell.addEventListener("focus", () => highlightCells(r, c));
           cell.addEventListener("blur", clearHighlights);
 
           boardEl.appendChild(cell);
         }
       }
-
-      // ✅ تفعيل الإعلانات
       (adsbygoogle = window.adsbygoogle || []).push({});
     }
 
@@ -201,14 +231,12 @@
     }
 
     function nextLevel() {
-      let levels = [4, 6, 9];
-      let idx = levels.indexOf(currentLevel);
-      if (idx < levels.length - 1) {
-        document.getElementById("level").value = levels[idx + 1];
+      if (currentStage < maxStages) {
+        currentStage++;
+        generateBoard();
       } else {
-        document.getElementById("level").value = levels[0];
+        alert("🎉 أنهيت كل المراحل!");
       }
-      generateBoard();
     }
 
     function highlightCells(row, col) {
