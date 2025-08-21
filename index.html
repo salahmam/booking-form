@@ -557,7 +557,36 @@ function generateBoard() {
       selected.classList.add("pop");
       setTimeout(()=> selected.classList.remove("pop"), 120);
     }
+function generateBoard() {
+  const board = document.getElementById("sudoku-board");
+  board.innerHTML = "";
 
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      const cell = document.createElement("input");
+      cell.type = "text";
+      cell.maxLength = 1; // فقط رقم واحد
+      cell.classList.add("cell");
+
+      // خلية مبدئية (قيمة جاهزة)
+      if (Math.random() > 0.7) {
+        cell.value = Math.floor(Math.random() * 9) + 1;
+        cell.disabled = true;
+        cell.classList.add("fixed");
+      }
+
+      // سماح فقط بأرقام 1-9
+      cell.addEventListener("input", (e) => {
+        const val = e.target.value;
+        if (!/^[1-9]$/.test(val)) {
+          e.target.value = "";
+        }
+      });
+
+      board.appendChild(cell);
+    }
+  }
+}
     function handleKey(cell, e){
       const editable = cell.dataset.editable === "true";
       if(!editable){
