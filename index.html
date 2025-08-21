@@ -302,7 +302,7 @@
   <header>
     <div class="wrap title">
       <span class="badge">سودوكو</span>
-      <h1> SALAH </h1>
+      <h1>تحدّي الألوان — يلا لودو 🎲</h1>
     </div>
   </header>
 
@@ -347,8 +347,11 @@
   </main>
 
   <footer class="footer">
-    صنع بحب — الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
+    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
   </footer>
+
+  <!-- ✅ صوت النقرة -->
+  <audio id="clickSound" src="https://assets.mixkit.co/sfx/download/mixkit-interface-click-1126.wav" preload="auto"></audio>
 
   <script>
     /************** Utilities **************/
@@ -364,12 +367,18 @@
     const btnReset = $("#btnReset");
     const confettiCanvas = $("#confetti");
     const ctx = confettiCanvas.getContext("2d");
+    const clickSound = $("#clickSound"); // ✅ الصوت
 
     const SIDE = 9, BOX = 3;
     let currentStage = 1;
     let initialBoard = []; // with zeros for blanks
     let solutionBoard = [];
     let startTime = null, timerInt = null;
+
+    function playClick(){
+      clickSound.currentTime = 0;
+      clickSound.play();
+    }
 
     function formatTime(sec){
       const m = Math.floor(sec/60).toString().padStart(2,'0');
@@ -396,7 +405,6 @@
       }
       return a;
     }
-   
     function generateFull(){
       const rBase = [0,1,2], rows = [].concat(...shuffle(rBase).map(g=>shuffle(rBase).map(r=>g*BOX+r)));
       const cBase = [0,1,2], cols = [].concat(...shuffle(cBase).map(g=>shuffle(cBase).map(c=>g*BOX+c)));
@@ -422,12 +430,10 @@
     }
 
     function isValidMove(board, r,c, num){
-      // row & col
       for(let i=0;i<SIDE;i++){
         if(board[r][i]===num && i!==c) return false;
         if(board[i][c]===num && i!==r) return false;
       }
-      // box
       const br = Math.floor(r/BOX)*BOX;
       const bc = Math.floor(c/BOX)*BOX;
       for(let i=0;i<BOX;i++){
@@ -442,268 +448,199 @@
     function solveBoard(board){
       const b = copyBoard(board);
       function findEmpty(){
-        for(let r=0;r<SIDE;r++) for(let c=0;c<SIDE;c++) if(b[r][c]===0) return [r,c];
+        for(let r=0;r<SIDE;r++){
+          for(let c=0;c<SIDE;c++){
+            if(b[r][c]===0) return [r,c];
+          }
+        }
         return null;
       }
       function backtrack(){
         const pos = findEmpty();
         if(!pos) return true;
         const [r,c] = pos;
-        for(let n=1;n<=9;n++){
-          if(isValidMove(b, r,c, n)){
-            b[r][c]=n;
+        for(let num=1; num<=SIDE; num++){
+          if(isValidMove(b,r,c,num)){
+            b[r][c]=num;
             if(backtrack()) return true;
             b[r][c]=0;
           }
         }
         return false;
       }
-      return backtrack() ? b : null;
+      if(backtrack()) return b;
+      return null;
     }
 
-    // difficulty scaling: from Stage 1..15 => blanks 35..60
-    function blanksFor(stage){
-      const s = Math.max(1, Math.min(15, stage));
-      const minBlanks = 35, maxBlanks = 60;
-      return Math.round(minBlanks + (maxBlanks-minBlanks) * ((s-1)/(15-1)));
+    /************** Render **************/
+    function makeCell(r,c,val,editable){
+      const d = document.createElement("div");
+      d.className="cell";
+      d.tabIndex=0;
+      d.dataset.r=r;
+      d.dataset.c=c;
+      d.dataset.box=Math.floor(r/BOX)*BOX+Math.floor(c/BOX);
+      d.dataset.editable=editable?"true":"false";
+      if(val!==0) d.textContent=val;
+      if(editable) d.contentEditable="true";
+      else d.contentEditable="false";
+      return d;
     }
 
-    /************** Rendering **************/
-    function boxIndex(r,c){ return Math.floor(r/3)*3 + Math.floor(c/3); }
-       
-    function buildBoard(puzzle){
-      boardEl.innerHTML = "";
-      confettiResize();
+    function renderBoard(board){
+      boardEl.innerHTML = "<canvas id='confetti'></canvas>";
       for(let r=0;r<SIDE;r++){
         for(let c=0;c<SIDE;c++){
-          const v = puzzle[r][c];
-          const div = document.createElement("div");
-          div.className = "cell";
-          div.tabIndex = 0;
-          div.dataset.r = r;
-          div.dataset.c = c;
-          div.dataset.box = boxIndex(r,c);
-          if(v!==0){
-            div.textContent = v;
-            div.dataset.editable = "false";
-            div.setAttribute("aria-readonly", "true");
+          const val = board[r][c];
+          const editable = val===0;
+          boardEl.appendChild(makeCell(r,c,val,editable));
+        }
+      }
+      attachEvents();
+      fitCanvas();
+    }
+
+    function attachEvents(){
+      $$(".cell[data-editable='true']").forEach(cell=>{
+        cell.addEventListener("focus", e=>{
+          $$("[data-selected='true']").forEach(x=>x.dataset.selected="false");
+          e.currentTarget.dataset.selected="true";
+        });
+        cell.addEventListener("blur", e=>{
+          e.currentTarget.dataset.selected="false";
+        });
+        cell.addEventListener("input", e=>{
+          playClick(); // ✅ صوت النقرة عند الكتابة
+          let val = e.currentTarget.textContent.trim();
+          if(!/^[1-9]$/.test(val)){
+            e.currentTarget.textContent="";
+            return;
+          }
+          const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
+          if(!isValidMove(currentBoard(),r,c,+val)){
+            e.currentTarget.classList.add("shake","wrong");
+            setTimeout(()=>e.currentTarget.classList.remove("shake","wrong"),600);
           }else{
-            div.dataset.editable = "true";
-            div.setAttribute("aria-readonly", "false");
-            div.textContent = "";
+            e.currentTarget.classList.add("pop","correct");
+            setTimeout(()=>e.currentTarget.classList.remove("pop","correct"),400);
           }
-          div.addEventListener("click", ()=> selectCell("text"));
-          div.addEventListener("keydown", (e)=> handleKey(div, e));
-          boardEl.appendChild(div);
-        }
-      }
-      updateProgress();
-      status("ابدأ — املأ الشبكة!", "info");
-      startTimer();
-    }
-
-    function readBoardFromDOM(){
-      const b = Array.from({length:SIDE}, ()=>Array(SIDE).fill(0));
-      $$(".cell").forEach(cell=>{
-        const r = +cell.dataset.r, c = +cell.dataset.c;
-        const val = cell.textContent.trim();
-        b[r][c] = val ? +val : 0;
-      });
-      return b;
-    }
-
-    function writeBoardToDOM(board){
-      $$(".cell").forEach(cell=>{
-        const r = +cell.dataset.r, c = +cell.dataset.c;
-        const v = board[r][c];
-        cell.textContent = v===0? "" : v;
+          updateProgress();
+        });
+        cell.addEventListener("keydown", e=>{
+          if(e.key==="Backspace" || e.key==="Delete"){
+            e.preventDefault();
+            playClick(); // ✅ صوت النقرة عند المسح
+            e.currentTarget.textContent="";
+            updateProgress();
+          }
+        });
       });
     }
 
-    let selected = null;
-    function selectCell(cell){
-      if(selected) selected.dataset.selected = "false";
-      selected = cell;
-      selected.dataset.selected = "true";
-      selected.classList.add("pop");
-      setTimeout(()=> selected.classList.remove("pop"), 120);
-    }
-    
-    function handleKey(cell, e){
-      const editable = cell.dataset.editable === "true";
-      if(!editable){
-        // allow arrows navigation
-        return navKeys(cell, e);
-      }
-      if(e.key>="1" && e.key<="9"){
-        cell.textContent = e.key;
-        cell.classList.remove("wrong");
-        cell.classList.add("pop");
-        updateProgress();
-      }else if(e.key==="Backspace" || e.key==="Delete" || e.key==="0"){
-        cell.textContent = "";
-        updateProgress();
-      }else{
-        navKeys(cell, e);
-      }
-    }
-
-    function navKeys(cell, e){
-      const r = +cell.dataset.r, c = +cell.dataset.c;
-      let rr=r, cc=c;
-      if(e.key==="ArrowUp"){ rr = Math.max(0, r-1); }
-      if(e.key==="ArrowDown"){ rr = Math.min(8, r+1); }
-      if(e.key==="ArrowLeft"){ cc = Math.max(0, c-1); }
-      if(e.key==="ArrowRight"){ cc = Math.min(8, c+1); }
-      if(rr!==r || cc!==c){
-        e.preventDefault();
-        const next = $(`.cell[data-r="${rr}"][data-c="${cc}"]`);
-        if(next){ next.focus(); selectCell(next); }
-      }
-    }
-
-    /************** Validation **************/
-    function checkBoard(){
-      // clear marks
-      $$(".cell").forEach(c=> c.classList.remove("wrong","correct"));
-      const b = readBoardFromDOM();
-      let complete = true, ok = true;
-
-      for(let r=0;r<SIDE;r++){
-        for(let c=0;c<SIDE;c++){
-          const val = b[r][c];
-          const cell = $(`.cell[data-r="${r}"][data-c="${c}"]`);
-          if(val===0){ complete = false; continue; }
-          if(!isValidMove(b, r,c,val)){
-            ok = false;
-            cell.classList.add("wrong", "shake");
-            setTimeout(()=> cell.classList.remove("shake"), 400);
-          }
-        }
-      }
-
-      if(!ok){
-        status("هناك أخطاء — حاول مرة أخرى", "bad");
-        return;
-      }
-
-      if(complete){
-        status("ممتاز! حل صحيح ✅", "ok");
-        celebrate();
-        stopTimer();
-        // lock all
-        $$(".cell").forEach(c=> c.dataset.editable="false");
-      }else{
-        status("صحيح حتى الآن — أكمل الباقي", "ok");
-      }
+    function currentBoard(){
+      return $$(".cell").reduce((acc,cell)=>{
+        const r=+cell.dataset.r, c=+cell.dataset.c;
+        if(!acc[r]) acc[r]=[];
+        let v= parseInt(cell.textContent)||0;
+        acc[r][c]=v;
+        return acc;
+      },[]);
     }
 
     function updateProgress(){
-      const b = readBoardFromDOM();
-      const filled = b.flat().filter(x=>x!==0).length;
-      const total = SIDE*SIDE - initialBoard.flat().filter(x=>x!==0).length;
-      const current = Math.max(0, filled - initialBoard.flat().filter(x=>x!==0).length);
-      const pct = Math.max(0, Math.min(100, Math.round((current/total)*100)));
-      progressEl.style.width = pct + "%";
-    }
-
-    function status(msg, kind="info"){
-      statusEl.textContent = msg;
-      statusEl.style.borderColor = {
-        info: "var(--cell-border)",
-        ok: "var(--ok)",
-        bad: "var(--bad)"
-      }[kind] || "var(--cell-border)";
-      statusEl.style.color = {
-        info: "var(--muted)",
-        ok: "#2bd576",
-        bad: "#ff8a8a"
-      }[kind] || "var(--muted)";
-    }
-
-    /************** Confetti **************/
-    let confettiPieces = [];
-    function confettiResize(){
-      confettiCanvas.width = boardEl.clientWidth;
-      confettiCanvas.height = boardEl.clientHeight;
-    }
-    function spawnConfetti(n=120){
-      const colors = ["#27c93f","#ffcc00","#2f7bff","#ea3b2d","#00d8ff"];
-      confettiPieces = Array.from({length:n}, ()=> ({
-        x: Math.random()*confettiCanvas.width,
-        y: -10 - Math.random()*40,
-        r: 2 + Math.random()*4,
-        c: colors[Math.floor(Math.random()*colors.length)],
-        v: 1 + Math.random()*2.5,
-        w: Math.random()*1.5,
-        a: Math.random()*Math.PI*2
-      }));
-    }
-    function drawConfetti(){
-      ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-      for(const p of confettiPieces){
-        p.a += 0.05;
-        p.y += p.v;
-        p.x += Math.sin(p.a)*p.w;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-        ctx.fillStyle = p.c;
-        ctx.fill();
+      const b=currentBoard();
+      let filled=0;
+      for(let r=0;r<SIDE;r++){
+        for(let c=0;c<SIDE;c++){
+          if(b[r][c]!==0) filled++;
+        }
       }
-      confettiPieces = confettiPieces.filter(p=> p.y < confettiCanvas.height+10);
-      if(confettiPieces.length){
-        requestAnimationFrame(drawConfetti);
-      }
-    }
-    function celebrate(){
-      spawnConfetti(160);
-      drawConfetti();
+      progressEl.style.width = (filled/(SIDE*SIDE))*100+"%";
     }
 
-    /************** Stage Management **************/
-    function buildStageSelector(){
-      stageSel.innerHTML = "";
-      for(let i=1;i<=15;i++){
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = `مرحلة ${i}`;
-        stageSel.appendChild(opt);
-      }
-      stageSel.value = currentStage;
-    }
-
-    function newStage(stage){
-      currentStage = stage;
-      buildStageSelector();
-      status(`تحميل المرحلة ${stage}...`);
-      const full = generateFull();
-      solutionBoard = full;
-      const blanks = blanksFor(stage);
-      initialBoard = removeCells(full, blanks);
-      buildBoard(initialBoard);
+    /************** Game Flow **************/
+    function newStage(level){
+      currentStage=level;
+      const full=generateFull();
+      solutionBoard=full;
+      const blanks=20+level*5;
+      initialBoard=removeCells(full,blanks);
+      renderBoard(initialBoard);
+      statusEl.textContent="المستوى "+level;
+      updateProgress();
+      startTimer();
     }
 
     function resetStage(){
-      writeBoardToDOM(initialBoard);
-      status("تمت الإعادة — جرّب من جديد");
+      renderBoard(initialBoard);
+      updateProgress();
+      statusEl.textContent="إعادة";
       startTimer();
-      progressEl.style.width = "0%";
     }
 
-    btnCheck.addEventListener("click", checkBoard);
-    btnNext.addEventListener("click", ()=>{
-      const next = currentStage >= 15 ? 1 : currentStage+1;
-      newStage(next);
-    });
+    function checkBoard(){
+      const b=currentBoard();
+      for(let r=0;r<SIDE;r++){
+        for(let c=0;c<SIDE;c++){
+          if(b[r][c]!==solutionBoard[r][c]){
+            statusEl.textContent="❌ هناك أخطاء";
+            return false;
+          }
+        }
+      }
+      statusEl.textContent="✅ صحيح!";
+      stopTimer();
+      confetti();
+      return true;
+    }
+
+    /************** Confetti **************/
+    function fitCanvas(){
+      confettiCanvas.width=boardEl.clientWidth;
+      confettiCanvas.height=boardEl.clientHeight;
+    }
+    window.addEventListener("resize", fitCanvas);
+
+    function confetti(){
+      fitCanvas();
+      const pieces=[];
+      for(let i=0;i<150;i++){
+        pieces.push({
+          x:Math.random()*confettiCanvas.width,
+          y:Math.random()*confettiCanvas.height/2,
+          r:Math.random()*6+4,
+          c:["#ea3b2d","#27c93f","#2f7bff","#ffcc00","#00d8ff"][Math.floor(Math.random()*5)],
+          d:Math.random()*3+2
+        });
+      }
+      let frame=0;
+      function animate(){
+        ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+        pieces.forEach(p=>{
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+          ctx.fillStyle=p.c;
+          ctx.fill();
+          p.y+=p.d;
+        });
+        frame++;
+        if(frame<120) requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    /************** Init **************/
+    for(let i=1;i<=10;i++){
+      const o=document.createElement("option");
+      o.value=i; o.textContent="مستوى "+i;
+      stageSel.appendChild(o);
+    }
+    stageSel.addEventListener("change", e=>newStage(+e.target.value));
     btnReset.addEventListener("click", resetStage);
-    stageSel.addEventListener("change", (e)=>{
-      newStage(+e.target.value);
-    });
-
-    window.addEventListener("resize", confettiResize);
-
-    // Init
+    btnCheck.addEventListener("click", checkBoard);
+    btnNext.addEventListener("click", ()=>newStage(currentStage+1));
     newStage(1);
+
   </script>
 </body>
 </html>
