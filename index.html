@@ -14,8 +14,8 @@
       padding: 0;
     }
     h1 {
-      color: #444;
-      margin-top: 20px;
+      color: #333;
+      margin: 20px;
     }
     #controls {
       margin: 15px;
@@ -25,19 +25,24 @@
       margin: 5px;
       font-size: 16px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: none;
       cursor: pointer;
       transition: 0.3s;
     }
+    button {
+      background: #ffcc00;
+      color: #333;
+      font-weight: bold;
+    }
     button:hover {
-      background: #eee;
+      background: #ffda4d;
     }
     #board {
       display: grid;
       margin: 20px auto;
-      border: 2px solid #333;
+      border: 3px solid #333;
       background: white;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .cell {
       border: 1px solid #bbb;
@@ -52,10 +57,10 @@
       background: #dff0ff;
     }
     .highlight {
-      background: #f9f9c9 !important;
+      background: #fef7c0 !important;
     }
     .prefilled {
-      background: #f3f3f3;
+      background: #eee;
       font-weight: bold;
       pointer-events: none;
     }
@@ -75,10 +80,39 @@
       font-size: 14px;
       color: #666;
     }
+    /* 📌 تنسيقات ألوان شبيهة بلودو */
+    .region-1 { background: #ffe6e6; }
+    .region-2 { background: #e6f7ff; }
+    .region-3 { background: #e6ffe6; }
+    .region-4 { background: #fff5e6; }
+    .region-5 { background: #f0e6ff; }
+    .region-6 { background: #fff0f5; }
+    .region-7 { background: #f9ffe6; }
+    .region-8 { background: #e6fff9; }
+    .region-9 { background: #f5f5f5; }
+
+    /* 📌 بنر الإعلانات */
+    .ads-banner {
+      margin: 15px auto;
+      text-align: center;
+    }
   </style>
+  <!-- ✅ كود Google Ads (استبدل ca-pub-XXXXXX بالمعرف الخاص بك) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXX"
+     crossorigin="anonymous"></script>
 </head>
 <body>
   <h1>🧩 لعبة سودوكو</h1>
+
+  <!-- 📌 مكان إعلان علوي -->
+  <div class="ads-banner">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-XXXXXXX"
+         data-ad-slot="1234567890"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
 
   <div id="controls">
     <label for="level">اختر المرحلة:</label>
@@ -87,13 +121,23 @@
       <option value="6">6 × 6 (متوسط)</option>
       <option value="9">9 × 9 (صعب)</option>
     </select>
-    <button onclick="generateBoard()">ابدأ اللعبة</button>
+    <button onclick="generateBoard()">ابدأ</button>
     <button onclick="checkBoard()">تحقق</button>
     <button onclick="resetBoard()">إعادة</button>
     <button onclick="nextLevel()">التالي</button>
   </div>
 
   <div id="board"></div>
+
+  <!-- 📌 مكان إعلان سفلي -->
+  <div class="ads-banner">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-XXXXXXX"
+         data-ad-slot="9876543210"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
 
   <footer>💖 صنع بحب</footer>
 
@@ -102,8 +146,8 @@
     let savedBoard = [];
     let currentLevel = 4;
 
-    function generateBoard(size) {
-      size = parseInt(document.getElementById("level").value);
+    function generateBoard() {
+      let size = parseInt(document.getElementById("level").value);
       currentLevel = size;
       boardEl.innerHTML = "";
       boardEl.style.gridTemplateColumns = `repeat(${size}, 50px)`;
@@ -118,7 +162,11 @@
           cell.maxLength = 1;
           cell.classList.add("cell");
 
-          // وضع بعض الأرقام كبداية
+          // 📌 تلوين المناطق مثل سودوكو
+          let regionClass = "region-" + (((Math.floor(r / 3) * 3) + Math.floor(c / 3)) + 1);
+          if (size === 9) cell.classList.add(regionClass);
+
+          // نملأ بعض الخانات كبداية
           if (Math.random() > 0.75) {
             let num = Math.floor(Math.random() * size) + 1;
             cell.value = num;
@@ -129,10 +177,6 @@
             savedBoard[r][c] = 0;
           }
 
-          // تمييز الصف والعمود عند التركيز
-          cell.addEventListener("focus", () => highlightCells(r, c));
-          cell.addEventListener("blur", clearHighlights);
-
           // إدخال أرقام فقط
           cell.oninput = function () {
             if (!/^[1-9]$/.test(cell.value)) {
@@ -140,9 +184,16 @@
             }
           };
 
+          // عند التركيز يميز الصف والعمود
+          cell.addEventListener("focus", () => highlightCells(r, c));
+          cell.addEventListener("blur", clearHighlights);
+
           boardEl.appendChild(cell);
         }
       }
+
+      // ✅ تفعيل الإعلانات
+      (adsbygoogle = window.adsbygoogle || []).push({});
     }
 
     function resetBoard() {
@@ -192,9 +243,9 @@
         }
       }
       if (valid) {
-        alert("✅ جيد! لا يوجد أخطاء حتى الآن");
+        alert("✅ ممتاز! لا يوجد أخطاء واضحة.");
       } else {
-        alert("❌ هناك أخطاء، جرب مرة أخرى");
+        alert("❌ يوجد بعض الأخطاء.");
       }
     }
   </script>
