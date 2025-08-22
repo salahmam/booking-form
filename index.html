@@ -1,10 +1,9 @@
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>سودوكو —   (  )</title>
+  <title>سودوكو — مستويات متدرجة (ألوان يلا لودو)</title>
   <style>
     :root{
       --bg: #0f0f12;
@@ -303,47 +302,17 @@
   <header>
     <div class="wrap title">
       <span class="badge">سودوكو</span>
-      <h1>  HELLEN 🦋   </h1>
+      <h1>تحدّي الألوان — يلا لودو 🎲</h1>
     </div>
   </header>
 
   <main class="wrap">
-    <div class="selectors">
-  <label>اختر المستوى:</label>
-  <select id="levelSelect">
-    <option value="1">المستوى 1</option>
-    <option value="2">المستوى 2</option>
-    <option value="3">المستوى 3</option>
-    <option value="4">المستوى 4</option>
-    <option value="5">المستوى 5</option>
-    <option value="6">المستوى 6</option>
-  </select>
-
-  <label>اختر المرحلة:</label>
-  <select id="stageSelect">
-    <option value="1">المرحلة 1</option>
-    <option value="2">المرحلة 2</option>
-    <option value="3">المرحلة 3</option>
-    <option value="4">المرحلة 4</option>
-    <option value="5">المرحلة 5</option>
-    <option value="6">المرحلة 6</option>
-    <option value="7">المرحلة 7</option>
-    <option value="8">المرحلة 8</option>
-    <option value="9">المرحلة 9</option>
-    <option value="10">المرحلة 10</option>
-  </select>
-
-  <button onclick="startGame()">ابدأ اللعبة</button>
-</div>
-
-<script>
-function startGame() {
-  let level = document.getElementById("levelSelect").value;
-  let stage = document.getElementById("stageSelect").value;
-  // استدعاء اللعبة مع المستوى والمرحلة
-  console.log("بدء المستوى: " + level + " - المرحلة: " + stage);
-}
-</script>
+    <div class="hud">
+      <div class="controls">
+        <label for="stage">المستوى/المرحلة:</label>
+        <select id="stage" aria-label="اختيار المستوى والمرحلة"></select>
+        <span class="pill" id="status">جاهز</span>
+      </div>
 
       <div class="timer" id="timer">00:00</div>
 
@@ -360,18 +329,9 @@ function startGame() {
 
       <!-- مساحة إعلان Google (مكان فقط بدون تغيير التصميم) -->
       <div id="adBanner" style="width:min(92vw,728px);height:90px;background:#11151b;border:1px dashed var(--cell-border);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted)">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxx"
-  crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-xxxxxxxx"
-     data-ad-slot="1234567890"
-     data-ad-format="auto"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-        <!-- ضع كود AdSense هنا عند النشر --> 
-      </div> 
+        مساحة إعلانية — كوكل AdSense
+        <!-- ضع كود AdSense هنا عند النشر -->
+      </div>
 
       <div class="board" id="board" role="grid" aria-label="شبكة سودوكو">
         <canvas id="confetti"></canvas>
@@ -394,7 +354,7 @@ function startGame() {
   </main>
 
   <footer class="footer">
-    صنع بحب —    <b>❤️ </b>. الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
+    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
   </footer>
 
   <!-- أصوات -->
