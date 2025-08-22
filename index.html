@@ -119,6 +119,16 @@ input.cell::-webkit-outer-spin-button,input.cell::-webkit-inner-spin-button{ -we
       </div>
     </div>
 
+    <!-- إعلان جوجل فوق صندوق المربعات -->
+    <div style="margin:10px 0;text-align:center">
+      <ins class="adsbygoogle" 
+           style="display:block" 
+           data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" 
+           data-ad-slot="1234567890" 
+           data-ad-format="auto"></ins>
+      <script>(window.adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    </div>
+
     <section class="game">
       <div class="board" id="board" role="grid" aria-label="شبكة سودوكو">
         <canvas id="confetti"></canvas>
@@ -137,13 +147,18 @@ input.cell::-webkit-outer-spin-button,input.cell::-webkit-inner-spin-button{ -we
         <span><span class="dot aqua"></span> تلميحات الحالة</span>
         <span><span class="dot red"></span> أخطاء</span>
       </div>
-
-      <!-- مكان إعلان جوجل داخل الصفحة -->
-      <div style="margin:20px 0;text-align:center">
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="1234567890" data-ad-format="auto"></ins>
-        <script>(window.adsbygoogle=window.adsbygoogle||[]).push({});</script>
-      </div>
     </section>
+
+    <!-- إعلان جوجل أسفل الموقع قبل الفوتر -->
+    <div style="margin:20px 0;text-align:center">
+      <ins class="adsbygoogle" 
+           style="display:block" 
+           data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" 
+           data-ad-slot="1234567891" 
+           data-ad-format="auto"></ins>
+      <script>(window.adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    </div>
+
   </main>
 
   <footer class="footer">
@@ -203,178 +218,79 @@ function celebrate(){ spawnConfetti(); drawConfetti(); try{winSound.currentTime=
 
 /* ======= Level/Box sizing ======= */
 function setSizeByLevel(level){
-  // 1→4, 2→5, 3→6, 4→7, 5→8, 6→9
   SIDE=3+level;
-  // اختر تقسيم الصناديق المناسب؛ إن لم يوجد تقسيم معقول، نعطّل الصناديق (1×1)
   if(SIDE===4){BOXR=2;BOXC=2;}
   else if(SIDE===6){BOXR=2;BOXC=3;}
   else if(SIDE===8){BOXR=2;BOXC=4;}
   else if(SIDE===9){BOXR=3;BOXC=3;}
-  else{BOXR=1;BOXC=1;} // 5 و 7: لاتين مربعات بدون صناديق
+  else{BOXR=1;BOXC=1;}
 }
 
 /* ======= Sudoku Generation ======= */
-// مولد لاتيني عام + نمط صناديق عند الإمكان
 function latinBase(side){ return Array.from({length:side},(_,r)=>Array.from({length:side},(_,c)=>((r+c)%side)+1)); }
 function shuffle(a){const arr=[...a];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr;}
-function generateFull(){
-  if(BOXR*BOXC===SIDE){ // نمط سودوكو قياسي
-    const rBase=[...Array(BOXR).keys()], cBase=[...Array(BOXC).keys()];
-    const rows=[].concat(...shuffle(rBase).map(g=>shuffle(rBase).map(r=>g*BOXR+r)));
-    const cols=[].concat(...shuffle(cBase).map(g=>shuffle(cBase).map(c=>g*BOXC+c)));
-    const nums=shuffle(Array.from({length:SIDE},(_,i)=>i+1));
-    const pattern=(r,c)=> (BOXC*(r%BOXR)+Math.floor(r/BOXR)+c)%SIDE;
-    return Array.from({length:SIDE},(_,r)=>Array.from({length:SIDE},(_,c)=>nums[pattern(rows[r],cols[c])]));
-  }else{
-    // لاتيني بسيط (بدون صناديق)
-    let b=latinBase(SIDE);
-    // خلط صفوف وأعمدة عشوائياً
-    const rOrd=shuffle([...Array(SIDE).keys()]);
-    const cOrd=shuffle([...Array(SIDE).keys()]);
-    b=rOrd.map(rr=>cOrd.map(cc=>b[rr][cc]));
-    // تبديل القيم عشوائياً
-    const map=shuffle(Array.from({length:SIDE},(_,i)=>i+1));
-    for(let r=0;r<SIDE;r++)for(let c=0;c<SIDE;c++) b[r][c]=map[b[r][c]-1];
-    return b;
+function generateSudoku(level=1){
+  let base=latinBase(SIDE).map(r=>shuffle(r));
+  // محاكاة إزالة خلايا بحسب المستوى
+  const board=base.map(r=>[...r]);
+  const empties=Math.floor(SIDE*SIDE*(0.2+0.1*level));
+  for(let i=0;i<empties;i++){
+    const r=Math.floor(Math.random()*SIDE), c=Math.floor(Math.random()*SIDE);
+    board[r][c]=0;
   }
-}
-function copyBoard(b){return b.map(r=>r.slice());}
-function removeCells(board, blanks){
-  const b=copyBoard(board);
-  const cells=shuffle([...Array(SIDE*SIDE).keys()]);
-  for(let i=0;i<blanks && i<cells.length;i++){
-    const idx=cells[i]; const r=Math.floor(idx/SIDE), c=idx%SIDE; b[r][c]=0;
-  }
-  return b;
+  return board;
 }
 
-/* ======= Validation ======= */
-function validRow(b,r,c,val){ for(let j=0;j<SIDE;j++) if(j!==c && b[r][j]===val) return false; return true; }
-function validCol(b,r,c,val){ for(let i=0;i<SIDE;i++) if(i!==r && b[i][c]===val) return false; return true; }
-function validBox(b,r,c,val){
-  if(BOXR===1&&BOXC===1) return true; // لا صناديق
-  const br=Math.floor(r/BOXR)*BOXR, bc=Math.floor(c/BOXC)*BOXC;
-  for(let i=0;i<BOXR;i++)for(let j=0;j<BOXC;j++){
-    const rr=br+i, cc=bc+j; if((rr!==r||cc!==c)&&b[rr][cc]===val) return false;
-  }
-  return true;
-}
-function isValidMove(b,r,c,val){ return validRow(b,r,c,val)&&validCol(b,r,c,val)&&validBox(b,r,c,val); }
-
-/* ======= Build Board ======= */
-function boxIndex(r,c){ if(BOXR===1&&BOXC===1) return -1; return Math.floor(r/BOXR)*BOXC + Math.floor(c/BOXC); }
-function thickBordersAdjust(){
-  // إزالة أي خصائص حدود سميكة افتراضية (الخاصة بـ9×9)
-  $$(".cell").forEach(el=>{ el.style.borderBottomWidth="1px"; el.style.borderRightWidth="1px"; el.removeAttribute("data-r"); el.removeAttribute("data-c"); });
-  // إعادة تطبيق حسب الحجم الحالي
-  if(BOXR>1||BOXC>1){
-    for(let r=0;r<SIDE;r++)for(let c=0;c<SIDE;c++){
-      const el=$(`.cell[data-pos="${r}-${c}"]`);
-      if(!el) continue;
-      if((r+1)%BOXR===0 && r<SIDE-1) el.style.borderBottomWidth="2px";
-      if((c+1)%BOXC===0 && c<SIDE-1) el.style.borderRightWidth="2px";
-      el.dataset.r = r; el.dataset.c = c;
-    }
-  }
-}
-function buildBoard(puzzle){
-  boardEl.style.gridTemplateColumns=`repeat(${SIDE},1fr)`;
-  boardEl.style.gridTemplateRows=`repeat(${SIDE},1fr)`;
-  boardEl.innerHTML=""; confettiResize();
+/* ======= DOM Rendering ======= */
+function renderBoard(b){
+  boardEl.innerHTML='';
   for(let r=0;r<SIDE;r++){
     for(let c=0;c<SIDE;c++){
-      const v=puzzle[r][c];
-      const input=document.createElement("input");
-      input.type="number"; input.min=1; input.max=SIDE; input.inputMode="numeric"; input.pattern="\\d*";
-      input.className="cell"; input.dataset.pos=`${r}-${c}`; input.dataset.box=boxIndex(r,c);
-      if(v!==0){ input.value=v; input.readOnly=true; input.dataset.editable="false"; }
-      else{ input.value=""; input.dataset.editable="true"; }
-      input.addEventListener("focus",()=>selectCell(input));
-      input.addEventListener("input",()=>{
-        // الحفاظ على خانة واحدة
-        if(input.value.length>2) input.value=input.value.slice(-2);
-        // لا تسمح إلا بقيم ضمن 1..SIDE
-        let n=parseInt(input.value,10);
-        if(isNaN(n)||n<1||n>SIDE) input.value="";
-        else{ try{clickSound.currentTime=0;clickSound.play();}catch{} }
-        updateProgress();
-      });
-      boardEl.appendChild(input);
+      const val=b[r][c], inp=document.createElement("input");
+      inp.type="text";inp.maxLength=1;inp.inputMode="numeric";inp.className="cell";inp.setAttribute("data-r",r);inp.setAttribute("data-c",c);inp.setAttribute("data-box",Math.floor(r/BOXR)*BOXC+Math.floor(c/BOXC));
+      if(val!==0){inp.value=val; inp.setAttribute("data-editable","false"); inp.readOnly=true;}
+      else{inp.setAttribute("data-editable","true");inp.addEventListener("input",e=>{e.target.value=e.target.value.replace(/[^1-9]/g,''); updateProgress();});}
+      boardEl.appendChild(inp);
     }
   }
-  thickBordersAdjust();
-  updateProgress();
-  status("ابدأ — املأ الشبكة!","info");
-  startTimer();
 }
 function readBoardFromDOM(){
-  const b=Array.from({length:SIDE},()=>Array(SIDE).fill(0));
-  $$(".cell").forEach(cell=>{
-    const [r,c]=cell.dataset.pos.split("-").map(Number);
-    const val=cell.value.trim();
-    b[r][c]=val?+val:0;
-  });
+  const cells=$$(".cell"); const b=Array.from({length:SIDE},()=>Array(SIDE).fill(0));
+  for(const cell of cells){ const r=+cell.dataset.r, c=+cell.dataset.c; b[r][c]=parseInt(cell.value)||0; }
   return b;
 }
-let selected=null;
-function selectCell(cell){ if(selected) selected.dataset.selected="false"; selected=cell; selected.dataset.selected="true"; selected.classList.add("pop"); setTimeout(()=>selected.classList.remove("pop"),120); }
 
-/* ======= Check/Actions ======= */
-function checkBoard(){
-  $$(".cell").forEach(c=>c.classList.remove("wrong","correct"));
-  const b=readBoardFromDOM(); let complete=true, ok=true;
-  for(let r=0;r<SIDE;r++){
-    for(let c=0;c<SIDE;c++){
-      const val=b[r][c]; const cell=$(`.cell[data-pos="${r}-${c}"]`);
-      if(val===0){ complete=false; continue; }
-      if(!isValidMove(b,r,c,val)){ ok=false; cell.classList.add("wrong","shake"); setTimeout(()=>cell.classList.remove("shake"),400); }
+/* ======= Actions ======= */
+btnCheck.onclick=function(){
+  const b=readBoardFromDOM(), flat=b.flat();
+  const errs=[];
+  for(let i=0;i<SIDE;i++){
+    const row=new Set(), col=new Set();
+    for(let j=0;j<SIDE;j++){
+      if(row.has(b[i][j]))errs.push([i,j]);
+      else if(b[i][j]!==0) row.add(b[i][j]);
+      if(col.has(b[j][i]))errs.push([j,i]);
+      else if(b[j][i]!==0) col.add(b[j][i]);
     }
   }
-  if(!ok){ status("هناك أخطاء — حاول مرة أخرى","bad"); return; }
-  if(complete){
-    status("ممتاز! حل صحيح ✅","ok");
-    celebrate(); stopTimer();
-    $$(".cell").forEach(c=>c.readOnly=true);
-  }else status("صحيح حتى الآن — أكمل الباقي","ok");
-}
-function resetStage(){ buildBoard(initialBoard); status("تمت الإعادة — جرّب من جديد"); startTimer(); progressEl.style.width="0%"; }
+  $$(".cell").forEach(c=>c.classList.remove("wrong","correct"));
+  errs.forEach(([r,c])=>{ const cell=$(`.cell[data-r="${r}"][data-c="${c}"]`); if(cell) cell.classList.add("wrong"); });
+  if(errs.length===0){status("تم الحلّ بنجاح!",'ok'); celebrate();}
+  else status("يوجد أخطاء", "bad");
+};
+btnReset.onclick=function(){renderBoard(initialBoard); updateProgress(); status("تم إعادة اللعب"); startTimer();}
+btnNext.onclick=function(){initialBoard=generateSudoku(currentLevel); renderBoard(initialBoard); updateProgress(); status("تم تحميل المرحلة الجديدة"); startTimer();}
 
-/* ======= Level & Stage flow ======= */
-function blanksFor(level,stage){
-  // صعوبة تدريجية حسب المرحلة (1..10): من 35% → 60% فراغات
-  const min=0.35, max=0.60, ratio=min+(max-min)*((stage-1)/9);
-  return Math.round(SIDE*SIDE*ratio);
+/* ======= Initialization ======= */
+function init(){
+  setSizeByLevel(currentLevel);
+  levelSel.innerHTML=''; for(let i=1;i<=5;i++){const opt=document.createElement("option");opt.value=i;opt.textContent="مستوى "+i;levelSel.appendChild(opt);}
+  stageSel.innerHTML=''; for(let i=1;i<=5;i++){const opt=document.createElement("option");opt.value=i;opt.textContent="مرحلة "+i;stageSel.appendChild(opt);}
+  initialBoard=generateSudoku(currentLevel);
+  renderBoard(initialBoard); updateProgress(); status("جاهز"); startTimer();
+  confettiResize(); window.addEventListener("resize",confettiResize);
 }
-function buildSelectors(){
-  // مستويات 1..6
-  levelSel.innerHTML="";
-  for(let l=1;l<=6;l++){ const o=document.createElement("option"); o.value=l; o.textContent=`المستوى ${l}`; levelSel.appendChild(o); }
-  // مراحل 1..10
-  stageSel.innerHTML="";
-  for(let s=1;s<=10;s++){ const o=document.createElement("option"); o.value=s; o.textContent=`مرحلة ${s}`; stageSel.appendChild(o); }
-  levelSel.value=currentLevel; stageSel.value=currentStage;
-}
-function newStage(level,stage){
-  currentLevel=level; currentStage=stage;
-  setSizeByLevel(level); buildSelectors();
-  status(`تحميل المستوى ${level} — المرحلة ${stage}...`);
-  const full=generateFull();
-  initialBoard=removeCells(full, blanksFor(level,stage));
-  buildBoard(initialBoard);
-}
-btnCheck.addEventListener("click",checkBoard);
-btnNext.addEventListener("click",()=>{
-  let ns=currentStage+1, nl=currentLevel;
-  if(ns>10){ ns=1; nl=nl>=6?1:nl+1; }
-  newStage(nl,ns);
-});
-btnReset.addEventListener("click",resetStage);
-levelSel.addEventListener("change",e=> newStage(+e.target.value,currentStage));
-stageSel.addEventListener("change",e=> newStage(currentLevel,+e.target.value));
-window.addEventListener("resize",confettiResize);
-
-/* ======= Init ======= */
-newStage(1,1);
+init();
 </script>
 </body>
 </html>
