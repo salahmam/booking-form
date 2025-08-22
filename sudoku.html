@@ -98,7 +98,7 @@
       align-items: center;
     }
 
-    select, button{
+    select, button, input[type=number]{
       background: var(--btn);
       border: 1px solid var(--cell-border);
       color: var(--ink);
@@ -120,8 +120,7 @@
       font-weight: 600;
       background: #161a21;
     }
-
-    .game{
+        .game{
       display: grid;
       grid-template-columns: 1fr;
       justify-items: center;
@@ -172,7 +171,7 @@
       transform: scale(1.02);
     }
 
-    /* thick borders for 3x3 boxes (kept as in original design) */
+    /* thick borders for 3x3 boxes */
     .cell[data-r="2"], .cell[data-r="5"]{ border-bottom: 2px solid var(--ink); }
     .cell[data-c="2"], .cell[data-c="5"]{ border-right: 2px solid var(--ink); }
 
@@ -326,15 +325,7 @@
         </div>
       </div>
     </div>
-
-    <section class="game">
-
-      <!-- مساحة إعلان Google (مكان فقط بدون تغيير التصميم) -->
-      <div id="adBanner" style="width:min(92vw,728px);height:90px;background:#11151b;border:1px dashed var(--cell-border);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted)">
-        مساحة إعلانية — كوكل AdSense
-        <!-- ضع كود AdSense هنا عند النشر -->
-      </div>
-
+        <section class="game">
       <div class="board" id="board" role="grid" aria-label="شبكة سودوكو">
         <canvas id="confetti"></canvas>
       </div>
@@ -346,30 +337,41 @@
       </div>
 
       <div class="legend">
-        <span><span class="dot green"></span> مربعات 3×3 ملوّنة</span>
+        <span><span class="dot green"></span> مربعات ملوّنة</span>
         <span><span class="dot yellow"></span> خلية مبدئية</span>
         <span><span class="dot blue"></span> تحديد الخلية</span>
         <span><span class="dot aqua"></span> تلميحات الحالة</span>
         <span><span class="dot red"></span> أخطاء</span>
       </div>
+
+      <!-- مكان إعلان جوجل -->
+      <div style="margin:20px 0; text-align:center;">
+        <!-- انسخ كود AdSense هنا -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
     </section>
   </main>
 
   <footer class="footer">
-    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
+    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. بالتوفيق! ✨
   </footer>
 
   <!-- أصوات -->
-  <audio id="clickSound" src="https://assets.mixkit.co/sfx/download/mixkit-interface-click-1126.wav" preload="auto"></audio>
-  <audio id="winSound" src="https://assets.mixkit.co/sfx/download/mixkit-achievement-bell-600.wav" preload="auto"></audio>
+  <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2561/2561-preview.mp3"></audio>
+  <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
   <script>
     /************** Utilities **************/
     const $ = sel => document.querySelector(sel);
     const $$ = sel => Array.from(document.querySelectorAll(sel));
     const boardEl = $("#board");
-    const stageSel = $("#stage");
     const levelSel = $("#level");
+    const stageSel = $("#stage");
     const statusEl = $("#status");
     const progressEl = $("#progressBar");
     const timerEl = $("#timer");
@@ -377,25 +379,16 @@
     const btnNext = $("#btnNext");
     const btnReset = $("#btnReset");
     const confettiCanvas = $("#confetti");
-    const sndClick = $("#sndClick");
-    const sndWin = $("#sndWin");
     const ctx = confettiCanvas.getContext("2d");
     const clickSound = $("#clickSound");
     const winSound = $("#winSound");
 
-    let SIDE = 9;
-    // box rows/cols pair — depends on SIDE
-    let BOX_R = 3, BOX_C = 3;
-
-    let currentLevel = 1; // 1..6
-    let currentStage = 1; // 1..10 within each level
-
-    let initialBoard = []; // zeros for blanks
+    let SIDE = 9, BOX = 3;
+    let currentLevel = 1;
+    let currentStage = 1;
+    let initialBoard = [];
     let solutionBoard = [];
     let startTime = null, timerInt = null;
-
-    function playClick(){ try{ clickSound.currentTime = 0; clickSound.play(); }catch{} }
-    function playWin(){ try{ winSound.currentTime = 0; winSound.play(); }catch{} }
 
     function formatTime(sec){
       const m = Math.floor(sec/60).toString().padStart(2,'0');
@@ -411,27 +404,8 @@
       }, 1000);
     }
     function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt = null; } }
-
-    /************** Level/Stage mapping **************/
-    // Level 1..6 => SIDE 4..9
-    function sideForLevel(lvl){ return 3 + Math.max(1, Math.min(6, lvl)); } // 1->4, 6->9
-    // box shape per SIDE (R x C); for primes fall back to no boxes (1 x SIDE)
-    function boxShapeFor(side){
-      const map = {
-        4: [2,2],
-        5: [1,5],
-        6: [2,3],
-        7: [1,7],
-        8: [2,4],
-        9: [3,3]
-      };
-      return map[side] || [1, side];
-    }
-
-    /************** Sudoku Gen/Solve **************/
-    // generalized pattern that respects rectangular boxes if BOX_R*BOX_C == SIDE
-    function pattern(r,c, R, C, N){ return (C*(r%R) + Math.floor(r/R) + c) % N; }
-
+        /************** Sudoku Gen/Solve **************/
+    function pattern(r,c){ return (BOX*(r%BOX) + Math.floor(r/BOX) + c) % SIDE; }
     function shuffle(arr){
       const a = [...arr];
       for(let i=a.length-1; i>0; i--){
@@ -440,23 +414,13 @@
       }
       return a;
     }
-
-    function generateFull(N, R, C){
-      // If R*C != N (prime sizes), generate Latin square (row/col rules only)
-      if(R*C !== N){
-        const base = [...Array(N).keys()]; // 0..N-1
-        const rows = shuffle(base);
-        const cols = shuffle(base);
-        const nums = shuffle([1,2,3,4,5,6,7,8,9].slice(0,N));
-        const board = Array.from({length:N}, (_,r)=>Array.from({length:N}, (_,c)=> nums[(rows[r] + cols[c]) % N]));
-        return board;
-      }
-      // standard box-friendly board
-      const rBase = [...Array(R).keys()], cBase = [...Array(C).keys()];
-      const rows = [].concat(...shuffle(rBase).map(g=>shuffle(rBase).map(r=>g*R+r)));
-      const cols = [].concat(...shuffle(cBase).map(g=>shuffle(cBase).map(c=>g*C+c)));
-      const nums = shuffle([1,2,3,4,5,6,7,8,9].slice(0,N));
-      const board = Array.from({length:N}, (_,r)=>Array.from({length:N}, (_,c)=> nums[pattern(rows[r], cols[c], R, C, N)]));
+    function generateFull(){
+      const rBase = Array.from({length:BOX}, (_,i)=>i);
+      const rows = [].concat(...shuffle(rBase).map(g=>shuffle(rBase).map(r=>g*BOX+r)));
+      const cBase = Array.from({length:BOX}, (_,i)=>i);
+      const cols = [].concat(...shuffle(cBase).map(g=>shuffle(cBase).map(c=>g*BOX+c)));
+      const nums = shuffle(Array.from({length:SIDE}, (_,i)=>i+1));
+      const board = Array.from({length:SIDE}, (_,r)=>Array.from({length:SIDE}, (_,c)=> nums[pattern(rows[r], cols[c])]));
       return board;
     }
 
@@ -465,102 +429,65 @@
     function removeCells(board, blanks){
       const b = copyBoard(board);
       let removed = 0;
-      const N = board.length;
-      const cells = shuffle([...Array(N*N).keys()]);
+      const cells = shuffle([...Array(SIDE*SIDE).keys()]);
       for(const idx of cells){
         if(removed>=blanks) break;
-        const r = Math.floor(idx/N), c = idx%N;
-        if(b[r][c] !== 0){
-          b[r][c] = 0;
-          removed++;
-        }
+        const r = Math.floor(idx/SIDE), c = idx%SIDE;
+        b[r][c] = 0;
+        removed++;
       }
       return b;
     }
 
     function isValidMove(board, r,c, num){
-      const N = board.length;
-      // row & col
-      for(let i=0;i<N;i++){
+      for(let i=0;i<SIDE;i++){
         if(board[r][i]===num && i!==c) return false;
         if(board[i][c]===num && i!==r) return false;
       }
-      // box (only if boxes are defined nicely)
-      if(BOX_R*BOX_C === N && BOX_R>1 && BOX_C>1){
-        const br = Math.floor(r/BOX_R)*BOX_R;
-        const bc = Math.floor(c/BOX_C)*BOX_C;
-        for(let i=0;i<BOX_R;i++){
-          for(let j=0;j<BOX_C;j++){
-            const rr=br+i, cc=bc+j;
-            if(board[rr][cc]===num && (rr!==r || cc!==c)) return false;
-          }
+      const br = Math.floor(r/BOX)*BOX;
+      const bc = Math.floor(c/BOX)*BOX;
+      for(let i=0;i<BOX;i++){
+        for(let j=0;j<BOX;j++){
+          const rr=br+i, cc=bc+j;
+          if(board[rr][cc]===num && (rr!==r || cc!==c)) return false;
         }
       }
       return true;
     }
 
-    function solveBoard(board){
-      const b = copyBoard(board);
-      const N = b.length;
-      function findEmpty(){
-        for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(b[r][c]===0) return [r,c];
-        return null;
-      }
-      function backtrack(){
-        const pos = findEmpty();
-        if(!pos) return true;
-        const [r,c] = pos;
-        for(let n=1;n<=N;n++){
-          if(isValidMove(b, r,c, n)){
-            b[r][c]=n;
-            if(backtrack()) return true;
-            b[r][c]=0;
-          }
-        }
-        return false;
-      }
-      return backtrack() ? b : null;
-    }
-
     /************** Rendering **************/
-    function boxIndex(r,c){
-      if(BOX_R*BOX_C !== SIDE || BOX_R===1 || BOX_C===1) return -1;
-      return Math.floor(r/BOX_R)*BOX_C + Math.floor(c/BOX_C);
-    }
+    function boxIndex(r,c){ return Math.floor(r/BOX)*BOX + Math.floor(c/BOX); }
 
     function buildBoard(puzzle){
       boardEl.innerHTML = "";
-      // set grid size
-      boardEl.style.gridTemplateColumns = `repeat(${SIDE}, 1fr)`;
-      boardEl.style.gridTemplateRows = `repeat(${SIDE}, 1fr)`;
-
       confettiResize();
       for(let r=0;r<SIDE;r++){
         for(let c=0;c<SIDE;c++){
           const v = puzzle[r][c];
-          const div = document.createElement("div");
-          div.className = "cell";
-          div.tabIndex = 0;
-          div.dataset.r = r;
-          div.dataset.c = c;
-          const bIdx = boxIndex(r,c);
-          if(bIdx>=0) div.dataset.box = bIdx;
-
-          // ✅ جميع الخلايا قابلة للكتابة كما طلبت سابقًا
-          div.dataset.editable = "true";
-          div.setAttribute("aria-readonly", "false");
-          div.setAttribute("contenteditable", "true");
-          div.setAttribute("inputmode", "numeric");
-          div.setAttribute("pattern", "[0-9]*");
-          div.textContent = v!==0 ? v : "";
-
-          // ديناميكيًا: حدود سميكة بحسب شكل الصندوق الفعلي (لا نغيّر CSS الأصلي)
-          if(BOX_R>1 && (r%BOX_R) === (BOX_R-1)) div.style.borderBottom = "2px solid var(--ink)";
-          if(BOX_C>1 && (c%BOX_C) === (BOX_C-1)) div.style.borderRight = "2px solid var(--ink)";
-
-          div.addEventListener("click", ()=> selectCell(div));
-          div.addEventListener("keydown", (e)=> handleKey(div, e));
-          boardEl.appendChild(div);
+          const input = document.createElement("input");
+          input.type = "number";
+          input.className = "cell";
+          input.min = 1;
+          input.max = SIDE;
+          input.inputMode = "numeric";
+          input.dataset.r = r;
+          input.dataset.c = c;
+          input.dataset.box = boxIndex(r,c);
+          if(v!==0){
+            input.value = v;
+            input.readOnly = true;
+            input.dataset.editable = "false";
+          }else{
+            input.value = "";
+            input.dataset.editable = "true";
+          }
+          input.addEventListener("focus", ()=> selectCell(input));
+          input.addEventListener("input", ()=> {
+            clickSound.currentTime = 0;
+            clickSound.play();
+            updateProgress();
+          });
+          boardEl.appendChild(input);
         }
       }
       updateProgress();
@@ -572,18 +499,10 @@
       const b = Array.from({length:SIDE}, ()=>Array(SIDE).fill(0));
       $$(".cell").forEach(cell=>{
         const r = +cell.dataset.r, c = +cell.dataset.c;
-        const val = cell.textContent.trim();
+        const val = cell.value.trim();
         b[r][c] = val ? +val : 0;
       });
       return b;
-    }
-
-    function writeBoardToDOM(board){
-      $$(".cell").forEach(cell=>{
-        const r = +cell.dataset.r, c = +cell.dataset.c;
-        const v = board[r][c];
-        cell.textContent = v===0? "" : v;
-      });
     }
 
     let selected = null;
@@ -591,51 +510,10 @@
       if(selected) selected.dataset.selected = "false";
       selected = cell;
       selected.dataset.selected = "true";
-      selected.classList.add("pop");
-      setTimeout(()=> selected.classList.remove("pop"), 120);
-    }
-
-    function handleKey(cell, e){
-      const editable = cell.dataset.editable === "true";
-      if(!editable){
-        // allow arrows navigation
-        return navKeys(cell, e);
-      }
-      if(e.key>="1" && e.key<="9"){
-        const val = +e.key;
-        if(val<=SIDE){
-          cell.textContent = e.key;
-          cell.classList.remove("wrong");
-          cell.classList.add("pop");
-          updateProgress();
-          playClick();
-        }
-      }else if(e.key==="Backspace" || e.key==="Delete" || e.key==="0"){
-        cell.textContent = "";
-        updateProgress();
-        playClick();
-      }else{
-        navKeys(cell, e);
-      }
-    }
-
-    function navKeys(cell, e){
-      const r = +cell.dataset.r, c = +cell.dataset.c;
-      let rr=r, cc=c;
-      if(e.key==="ArrowUp"){ rr = Math.max(0, r-1); }
-      if(e.key==="ArrowDown"){ rr = Math.min(SIDE-1, r+1); }
-      if(e.key==="ArrowLeft"){ cc = Math.max(0, c-1); }
-      if(e.key==="ArrowRight"){ cc = Math.min(SIDE-1, c+1); }
-      if(rr!==r || cc!==c){
-        e.preventDefault();
-        const next = $(`.cell[data-r="${rr}"][data-c="${cc}"]`);
-        if(next){ next.focus(); selectCell(next); }
-      }
     }
 
     /************** Validation **************/
     function checkBoard(){
-      // clear marks
       $$(".cell").forEach(c=> c.classList.remove("wrong","correct"));
       const b = readBoardFromDOM();
       let complete = true, ok = true;
@@ -647,8 +525,7 @@
           if(val===0){ complete = false; continue; }
           if(!isValidMove(b, r,c,val)){
             ok = false;
-            cell.classList.add("wrong", "shake");
-            setTimeout(()=> cell.classList.remove("shake"), 400);
+            cell.classList.add("wrong");
           }
         }
       }
@@ -661,31 +538,24 @@
       if(complete){
         status("ممتاز! حل صحيح ✅", "ok");
         celebrate();
-        try{ sndWin.currentTime=0; sndWin.play(); }catch{}
-        playWin();
+        winSound.play();
         stopTimer();
-        // lock all (اختياري: نبقيها قابلة للكتابة بناءً على طلبك السابق)
-        // $$(".cell").forEach(c=> c.dataset.editable="false");
+        $$(".cell").forEach(c=> c.readOnly = true);
       }else{
         status("صحيح حتى الآن — أكمل الباقي", "ok");
       }
     }
-
-    function updateProgress(){
+        function updateProgress(){
       const b = readBoardFromDOM();
       const filled = b.flat().filter(x=>x!==0).length;
-      const total = SIDE*SIDE; // بما أن كل الخلايا قابلة للكتابة
-      const pct = Math.max(0, Math.min(100, Math.round((filled/total)*100)));
+      const total = SIDE*SIDE - initialBoard.flat().filter(x=>x!==0).length;
+      const current = Math.max(0, filled - initialBoard.flat().filter(x=>x!==0).length);
+      const pct = Math.max(0, Math.min(100, Math.round((current/total)*100)));
       progressEl.style.width = pct + "%";
     }
 
     function status(msg, kind="info"){
       statusEl.textContent = msg;
-      statusEl.style.borderColor = {
-        info: "var(--cell-border)",
-        ok: "var(--ok)",
-        bad: "var(--bad)"
-      }[kind] || "var(--cell-border)";
       statusEl.style.color = {
         info: "var(--muted)",
         ok: "#2bd576",
@@ -699,7 +569,7 @@
       confettiCanvas.width = boardEl.clientWidth;
       confettiCanvas.height = boardEl.clientHeight;
     }
-    function spawnConfetti(n=160){
+    function spawnConfetti(n=120){
       const colors = ["#27c93f","#ffcc00","#2f7bff","#ea3b2d","#00d8ff"];
       confettiPieces = Array.from({length:n}, ()=> ({
         x: Math.random()*confettiCanvas.width,
@@ -728,67 +598,56 @@
       }
     }
     function celebrate(){
-      spawnConfetti(180);
+      spawnConfetti(160);
       drawConfetti();
     }
 
-    /************** Stage Management (6 levels x 10 stages) **************/
-    
+    /************** Stage & Level Management **************/
+    function blanksFor(level, stage){
+      // كلما ارتفع المستوى زادت الصعوبة
+      const minBlanks = 4 + level*2;
+      const maxBlanks = SIDE*SIDE/2;
+      return Math.min(maxBlanks, minBlanks + stage*2);
+    }
+
     function buildSelectors(){
-      // إعادة بناء القوائم
       levelSel.innerHTML = "";
-      stageSel.innerHTML = "";
       for(let l=1; l<=6; l++){
         const opt = document.createElement("option");
         opt.value = l;
         opt.textContent = `المستوى ${l}`;
         levelSel.appendChild(opt);
       }
+      stageSel.innerHTML = "";
       for(let s=1; s<=10; s++){
         const opt = document.createElement("option");
         opt.value = s;
-        opt.textContent = `المرحلة ${s}`;
+        opt.textContent = `مرحلة ${s}`;
         stageSel.appendChild(opt);
       }
-      levelSel.value = String(currentLevel);
-      stageSel.value = String(currentStage);
-
-      // عند التغيير، نعيد تحميل المرحلة
-      levelSel.addEventListener("change", ()=>{
-        newStage(+levelSel.value, +stageSel.value);
-      });
-      stageSel.addEventListener("change", ()=>{
-        newStage(+levelSel.value, +stageSel.value);
-      });
-    }
-
-      }
-      levelSel.value = String(currentLevel);
-      stageSel.value = String(currentStage);
+      levelSel.value = currentLevel;
+      stageSel.value = currentStage;
     }
 
     function newStage(level, stage){
       currentLevel = level;
       currentStage = stage;
-      [BOX_R, BOX_C] = boxShapeFor(sideForLevel(level));
-      SIDE = sideForLevel(level);
 
-      // update board grid template to SIDE
-      boardEl.style.gridTemplateColumns = `repeat(${SIDE}, 1fr)`;
-      boardEl.style.gridTemplateRows = `repeat(${SIDE}, 1fr)`;
+      // حجم اللوحة حسب المستوى
+      SIDE = 3 + level; // المستوى 1 = 4×4 ... المستوى 6 = 9×9
+      BOX = Math.floor(Math.sqrt(SIDE));
 
+      buildSelectors();
       status(`تحميل المستوى ${level} — المرحلة ${stage}...`);
-      const full = generateFull(SIDE, BOX_R, BOX_C);
-      solutionBoard = solveBoard(full) || full; // ensure solvable
-      // blanks scale with size; keep challenge reasonable
-      const density = 0.5; // 50% blanks تقريبًا
-      const blanks = Math.round(SIDE*SIDE*density);
-      initialBoard = removeCells(solutionBoard, blanks);
+      const full = generateFull();
+      solutionBoard = full;
+      const blanks = blanksFor(level, stage);
+      initialBoard = removeCells(full, blanks);
       buildBoard(initialBoard);
     }
 
     function resetStage(){
-      writeBoardToDOM(initialBoard);
+      buildBoard(initialBoard);
       status("تمت الإعادة — جرّب من جديد");
       startTimer();
       progressEl.style.width = "0%";
@@ -796,36 +655,26 @@
 
     btnCheck.addEventListener("click", checkBoard);
     btnNext.addEventListener("click", ()=>{
-      let lvl = currentLevel, st = currentStage + 1;
-      if(st>10){ st=1; lvl++; }
-      if(lvl>6){ lvl=1; st=1; }
-      levelSel.value = String(lvl);
-      stageSel.value = String(st);
-      newStage(lvl, st);
+      let nextStage = currentStage+1;
+      let nextLevel = currentLevel;
+      if(nextStage>10){
+        nextStage = 1;
+        nextLevel = currentLevel>=6 ? 1 : currentLevel+1;
+      }
+      newStage(nextLevel, nextStage);
     });
     btnReset.addEventListener("click", resetStage);
-    
+    levelSel.addEventListener("change", e=>{
+      newStage(+e.target.value, currentStage);
+    });
+    stageSel.addEventListener("change", e=>{
+      newStage(currentLevel, +e.target.value);
+    });
+
     window.addEventListener("resize", confettiResize);
 
     // Init
-    (function init(){
-      buildSelectors();
-      newStage(1,1);
-    })();
+    newStage(1,1);
   </script>
-
-  <!-- أصوات -->
-  <audio id="sndClick" preload="auto">
-    <source src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" type="audio/ogg">
-  </audio>
-  <audio id="sndWin" preload="auto">
-    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-  </audio>
-  <!-- مساحة إعلان جوجل -->
-  <div id="adBanner" style="width:100%;max-width:728px;margin:20px auto;text-align:center;min-height:90px;border:1px dashed #444;">
-    <!-- ضع هنا كود AdSense لاحقًا -->
-    إعلان
-  </div>
-
 </body>
 </html>
