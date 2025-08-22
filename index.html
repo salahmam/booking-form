@@ -360,9 +360,18 @@ function startGame() {
 
       <!-- مساحة إعلان Google (مكان فقط بدون تغيير التصميم) -->
       <div id="adBanner" style="width:min(92vw,728px);height:90px;background:#11151b;border:1px dashed var(--cell-border);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted)">
-        مساحة إعلانية — كوكل AdSense
-        <!-- ضع كود AdSense هنا عند النشر -->
-      </div>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxx"
+  crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-xxxxxxxx"
+     data-ad-slot="1234567890"
+     data-ad-format="auto"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+        <!-- ضع كود AdSense هنا عند النشر --> 
+      </div> 
 
       <div class="board" id="board" role="grid" aria-label="شبكة سودوكو">
         <canvas id="confetti"></canvas>
@@ -820,8 +829,3 @@ function startGame() {
   </script>
 </body>
 </html>
-"""
-path = "/mnt/data/sudoku_yalla_levels.html"
-with open(path, "w", encoding="utf-8") as f:
-    f.write(html)
-path
