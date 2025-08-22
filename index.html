@@ -98,7 +98,7 @@
       align-items: center;
     }
 
-    select, button, input[type=number]{
+    select, button, input.cell{
       background: var(--btn);
       border: 1px solid var(--cell-border);
       color: var(--ink);
@@ -120,7 +120,8 @@
       font-weight: 600;
       background: #161a21;
     }
-        .game{
+
+    .game{
       display: grid;
       grid-template-columns: 1fr;
       justify-items: center;
@@ -155,9 +156,11 @@
       border-radius: 9px;
       transition: background .15s ease, transform .07s ease, box-shadow .2s ease;
       outline: none;
-      caret-color: transparent;
       user-select: none;
+      text-align: center;
+      caret-color: transparent;
     }
+    input.cell { caret-color: auto; }
     .cell[data-editable="true"]{
       background: #1b2130;
       cursor: pointer;
@@ -171,7 +174,7 @@
       transform: scale(1.02);
     }
 
-    /* thick borders for 3x3 boxes */
+    /* thick borders for 3x3 boxes (لـ 9x9) */
     .cell[data-r="2"], .cell[data-r="5"]{ border-bottom: 2px solid var(--ink); }
     .cell[data-c="2"], .cell[data-c="5"]{ border-right: 2px solid var(--ink); }
 
@@ -247,6 +250,9 @@
       font-weight: 800;
       letter-spacing: .3px;
       box-shadow: 0 10px 28px rgba(39,201,63,.35);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
     }
     .btn-cta:hover{ filter: brightness(1.05); }
     .btn-danger{
@@ -255,6 +261,9 @@
       color: #fff;
       font-weight: 800;
       box-shadow: 0 10px 28px rgba(234,59,45,.35);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
     }
     .btn-secondary{
       background: linear-gradient(135deg, #2f7bff, #00d8ff);
@@ -262,6 +271,9 @@
       color: #041225;
       font-weight: 800;
       box-shadow: 0 10px 28px rgba(47,123,255,.35);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
     }
 
     .progress{
@@ -296,6 +308,9 @@
       .legend{ grid-template-columns: repeat(3, max-content); }
     }
   </style>
+
+  <!-- (اختياري) سكربت AdSense العمومي - استبدل data-ad-client لاحقاً -->
+  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxxxxx" crossorigin="anonymous"></script> -->
 </head>
 <body>
   <header>
@@ -325,7 +340,8 @@
         </div>
       </div>
     </div>
-        <section class="game">
+
+    <section class="game">
       <div class="board" id="board" role="grid" aria-label="شبكة سودوكو">
         <canvas id="confetti"></canvas>
       </div>
@@ -337,33 +353,33 @@
       </div>
 
       <div class="legend">
-        <span><span class="dot green"></span> مربعات ملوّنة</span>
+        <span><span class="dot green"></span> مربعات 3×3 ملوّنة</span>
         <span><span class="dot yellow"></span> خلية مبدئية</span>
         <span><span class="dot blue"></span> تحديد الخلية</span>
         <span><span class="dot aqua"></span> تلميحات الحالة</span>
         <span><span class="dot red"></span> أخطاء</span>
       </div>
 
-      <!-- مكان إعلان جوجل -->
+      <!-- مكان إعلان جوجل داخل الصفحة -->
       <div style="margin:20px 0; text-align:center;">
-        <!-- انسخ كود AdSense هنا -->
+        <!-- استبدل data-ad-client و data-ad-slot بقيم حسابك -->
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
              data-ad-slot="1234567890"
              data-ad-format="auto"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        <script>(window.adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. بالتوفيق! ✨
+    صنع بحب — ألوان مستوحاة من <b>Yalla Ludo</b>. الأرقام من 1 إلى 9 فقط. بالتوفيق! ✨
   </footer>
 
   <!-- أصوات -->
-  <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2561/2561-preview.mp3"></audio>
-  <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+  <audio id="clickSound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2561/2561-preview.mp3"></audio>
+  <audio id="winSound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
   <script>
     /************** Utilities **************/
@@ -384,10 +400,9 @@
     const winSound = $("#winSound");
 
     let SIDE = 9, BOX = 3;
-    let currentLevel = 1;
-    let currentStage = 1;
-    let initialBoard = [];
-    let solutionBoard = [];
+    let currentLevel = 1; // 1..6 => 4x4 .. 9x9
+    let currentStage = 1; // 1..10
+    let initialBoard = []; // zeros for blanks
     let startTime = null, timerInt = null;
 
     function formatTime(sec){
@@ -404,13 +419,14 @@
       }, 1000);
     }
     function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt = null; } }
-        /************** Sudoku Gen/Solve **************/
+
+    /************** Sudoku Gen/Solve **************/
     function pattern(r,c){ return (BOX*(r%BOX) + Math.floor(r/BOX) + c) % SIDE; }
     function shuffle(arr){
       const a = [...arr];
       for(let i=a.length-1; i>0; i--){
         const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]] = [a[j],a[i]];
+        [a[i],a[j]] = [a[j],a[i)];
       }
       return a;
     }
@@ -440,10 +456,12 @@
     }
 
     function isValidMove(board, r,c, num){
+      // صف وعمود
       for(let i=0;i<SIDE;i++){
         if(board[r][i]===num && i!==c) return false;
         if(board[i][c]===num && i!==r) return false;
       }
+      // صندوق
       const br = Math.floor(r/BOX)*BOX;
       const bc = Math.floor(c/BOX)*BOX;
       for(let i=0;i<BOX;i++){
@@ -459,6 +477,10 @@
     function boxIndex(r,c){ return Math.floor(r/BOX)*BOX + Math.floor(c/BOX); }
 
     function buildBoard(puzzle){
+      // ضبط شبكة CSS حسب الحجم
+      boardEl.style.gridTemplateColumns = `repeat(${SIDE}, 1fr)`;
+      boardEl.style.gridTemplateRows = `repeat(${SIDE}, 1fr)`;
+
       boardEl.innerHTML = "";
       confettiResize();
       for(let r=0;r<SIDE;r++){
@@ -470,6 +492,7 @@
           input.min = 1;
           input.max = SIDE;
           input.inputMode = "numeric";
+          input.pattern = "\\d*";
           input.dataset.r = r;
           input.dataset.c = c;
           input.dataset.box = boxIndex(r,c);
@@ -483,8 +506,12 @@
           }
           input.addEventListener("focus", ()=> selectCell(input));
           input.addEventListener("input", ()=> {
-            clickSound.currentTime = 0;
-            clickSound.play();
+            // تنظيف أي رموز غير رقمية
+            if(input.value.length>1) input.value = input.value.slice(-1);
+            const n = parseInt(input.value,10);
+            if(isNaN(n) || n<1 || n>SIDE){ input.value=""; }
+            // صوت نقرة
+            if(!isNaN(n)) { try{ clickSound.currentTime = 0; clickSound.play(); }catch(e){} }
             updateProgress();
           });
           boardEl.appendChild(input);
@@ -525,7 +552,8 @@
           if(val===0){ complete = false; continue; }
           if(!isValidMove(b, r,c,val)){
             ok = false;
-            cell.classList.add("wrong");
+            cell.classList.add("wrong","shake");
+            setTimeout(()=> cell.classList.remove("shake"), 400);
           }
         }
       }
@@ -538,24 +566,30 @@
       if(complete){
         status("ممتاز! حل صحيح ✅", "ok");
         celebrate();
-        winSound.play();
+        try{ winSound.currentTime = 0; winSound.play(); }catch(e){}
         stopTimer();
         $$(".cell").forEach(c=> c.readOnly = true);
       }else{
         status("صحيح حتى الآن — أكمل الباقي", "ok");
       }
     }
-        function updateProgress(){
+
+    function updateProgress(){
       const b = readBoardFromDOM();
       const filled = b.flat().filter(x=>x!==0).length;
       const total = SIDE*SIDE - initialBoard.flat().filter(x=>x!==0).length;
       const current = Math.max(0, filled - initialBoard.flat().filter(x=>x!==0).length);
-      const pct = Math.max(0, Math.min(100, Math.round((current/total)*100)));
+      const pct = total>0 ? Math.max(0, Math.min(100, Math.round((current/total)*100))) : 0;
       progressEl.style.width = pct + "%";
     }
 
     function status(msg, kind="info"){
       statusEl.textContent = msg;
+      statusEl.style.borderColor = {
+        info: "var(--cell-border)",
+        ok: "var(--ok)",
+        bad: "var(--bad)"
+      }[kind] || "var(--cell-border)";
       statusEl.style.color = {
         info: "var(--muted)",
         ok: "#2bd576",
@@ -569,7 +603,7 @@
       confettiCanvas.width = boardEl.clientWidth;
       confettiCanvas.height = boardEl.clientHeight;
     }
-    function spawnConfetti(n=120){
+    function spawnConfetti(n=160){
       const colors = ["#27c93f","#ffcc00","#2f7bff","#ea3b2d","#00d8ff"];
       confettiPieces = Array.from({length:n}, ()=> ({
         x: Math.random()*confettiCanvas.width,
@@ -598,16 +632,22 @@
       }
     }
     function celebrate(){
-      spawnConfetti(160);
+      spawnConfetti(180);
       drawConfetti();
     }
 
     /************** Stage & Level Management **************/
+    function setSizeByLevel(level){
+      SIDE = 3 + level; // 1→4x4 .. 6→9x9
+      BOX = Math.floor(Math.sqrt(SIDE)); // 4→2، 9→3
+    }
     function blanksFor(level, stage){
-      // كلما ارتفع المستوى زادت الصعوبة
-      const minBlanks = 4 + level*2;
-      const maxBlanks = SIDE*SIDE/2;
-      return Math.min(maxBlanks, minBlanks + stage*2);
+      // صعوبة تدريجية: نسبة الخلايا الفارغة تعتمد على الحجم والمرحلة
+      const total = SIDE*SIDE;
+      const minRatio = 0.35; // أسهل
+      const maxRatio = 0.6;  // أصعب
+      const ratio = minRatio + (maxRatio-minRatio) * ((stage-1)/9); // 1..10
+      return Math.round(total * ratio);
     }
 
     function buildSelectors(){
@@ -633,14 +673,10 @@
       currentLevel = level;
       currentStage = stage;
 
-      // حجم اللوحة حسب المستوى
-      SIDE = 3 + level; // المستوى 1 = 4×4 ... المستوى 6 = 9×9
-      BOX = Math.floor(Math.sqrt(SIDE));
-
+      setSizeByLevel(level);
       buildSelectors();
       status(`تحميل المستوى ${level} — المرحلة ${stage}...`);
       const full = generateFull();
-      solutionBoard = full;
       const blanks = blanksFor(level, stage);
       initialBoard = removeCells(full, blanks);
       buildBoard(initialBoard);
