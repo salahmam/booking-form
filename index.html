@@ -307,12 +307,42 @@
   </header>
 
   <main class="wrap">
-    <div class="hud">
-      <div class="controls">
-        <label for="stage">المستوى/المرحلة:</label>
-        <select id="stage" aria-label="اختيار المستوى والمرحلة"></select>
-        <span class="pill" id="status">جاهز</span>
-      </div>
+    <div class="selectors">
+  <label>اختر المستوى:</label>
+  <select id="levelSelect">
+    <option value="1">المستوى 1</option>
+    <option value="2">المستوى 2</option>
+    <option value="3">المستوى 3</option>
+    <option value="4">المستوى 4</option>
+    <option value="5">المستوى 5</option>
+    <option value="6">المستوى 6</option>
+  </select>
+
+  <label>اختر المرحلة:</label>
+  <select id="stageSelect">
+    <option value="1">المرحلة 1</option>
+    <option value="2">المرحلة 2</option>
+    <option value="3">المرحلة 3</option>
+    <option value="4">المرحلة 4</option>
+    <option value="5">المرحلة 5</option>
+    <option value="6">المرحلة 6</option>
+    <option value="7">المرحلة 7</option>
+    <option value="8">المرحلة 8</option>
+    <option value="9">المرحلة 9</option>
+    <option value="10">المرحلة 10</option>
+  </select>
+
+  <button onclick="startGame()">ابدأ اللعبة</button>
+</div>
+
+<script>
+function startGame() {
+  let level = document.getElementById("levelSelect").value;
+  let stage = document.getElementById("stageSelect").value;
+  // استدعاء اللعبة مع المستوى والمرحلة
+  console.log("بدء المستوى: " + level + " - المرحلة: " + stage);
+}
+</script>
 
       <div class="timer" id="timer">00:00</div>
 
