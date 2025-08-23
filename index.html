@@ -312,8 +312,20 @@ function buildBoard(puzzle){
       else{ input.value=""; input.readOnly=false; input.dataset.editable="true"; }
       input.addEventListener("focus",()=>selectCell(input));
       input.addEventListener("input",()=>{
-        // الحفاظ على خانة واحدة
-        if(input.value.length>2) input.value=input.value.slice(-2);
+  // الحفاظ على خانة واحدة
+  if(input.value.length>2) input.value=input.value.slice(-2);
+
+  let n=parseInt(input.value,10);
+
+  if(isNaN(n)||n<1||n>SIDE){
+    input.value="";
+    input.focus(); // ✅ إبقاء التركيز حتى يبقى الكيبورد
+    return;
+  }
+
+  try{ clickSound.currentTime=0; clickSound.play(); }catch{}
+  updateProgress();
+});
         // لا تسمح إلا بقيم ضمن 1..SIDE
         let n=parseInt(input.value,10);
         if(isNaN(n)||n<1||n>SIDE) input.value="";
