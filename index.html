@@ -56,8 +56,8 @@ input.cell::-webkit-outer-spin-button,input.cell::-webkit-inner-spin-button{ -we
 .cell:focus-visible{outline:2px solid var(--accent);box-shadow:0 0 0 6px rgba(0,216,255,.08)}
 .cell[data-selected="true"]{background:var(--cell-focus);transform:scale(1.02)}
 /* خطوط سميكة لمربعات 3×3 الافتراضية (سيتم ضبطها بالحجم) */
-.cell[data-r="2"],.cell[data-r="5"]{border-bottom:2px solid var(--ink)}
-.cell[data-c="2"],.cell[data-c="5"]{border-right:2px solid var(--ink)}
+.cell[data-r="2"], .cell[data-r="5"] { border-bottom:3px solid yellow; }
+.cell[data-c="2"], .cell[data-c="5"] { border-right:3px solid yellow; }
 /* ألوان صناديق */
 .cell[data-box="0"],.cell[data-box="8"]{background-image:linear-gradient(145deg, rgba(39,201,63,.10), rgba(39,201,63,.04))}
 .cell[data-box="1"],.cell[data-box="7"]{background-image:linear-gradient(145deg, rgba(255,204,0,.10), rgba(255,204,0,.04))}
