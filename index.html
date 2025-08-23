@@ -309,7 +309,7 @@ function buildBoard(puzzle){
       input.type="number"; input.min=1; input.max=SIDE; input.inputMode="numeric"; input.pattern="\\d*";
       input.className="cell"; input.dataset.pos=`${r}-${c}`; input.dataset.box=boxIndex(r,c);
       if(v!==0){ input.value=v; input.readOnly=true; input.dataset.editable="false"; }
-      else{ input.value=""; input.dataset.editable="true"; }
+      else{ input.value=""; input.readOnly=false; input.dataset.editable="true"; }
       input.addEventListener("focus",()=>selectCell(input));
       input.addEventListener("input",()=>{
         // الحفاظ على خانة واحدة
