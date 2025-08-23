@@ -56,8 +56,29 @@ input.cell::-webkit-outer-spin-button,input.cell::-webkit-inner-spin-button{ -we
 .cell:focus-visible{outline:2px solid var(--accent);box-shadow:0 0 0 6px rgba(0,216,255,.08)}
 .cell[data-selected="true"]{background:var(--cell-focus);transform:scale(1.02)}
 /* خطوط سميكة لمربعات 3×3 الافتراضية (سيتم ضبطها بالحجم) */
-.cell[data-r="2"], .cell[data-r="5"] { border-bottom:3px solid yellow; }
-.cell[data-c="2"], .cell[data-c="5"] { border-right:3px solid yellow; }
+function thickBordersAdjust(){
+  // إزالة أي خصائص حدود سميكة سابقة
+  $$(".cell").forEach(el=>{
+    el.style.borderBottomWidth="1px";
+    el.style.borderRightWidth="1px";
+    el.removeAttribute("data-r");
+    el.removeAttribute("data-c");
+  });
+
+  // إعادة تطبيق حسب حجم الشبكة الحالي
+  $$(".cell").forEach(el=>{
+    const [r,c] = el.dataset.pos.split("-").map(Number);
+    el.dataset.r = r; el.dataset.c = c;
+
+    // حدود سميكة حسب حجم الصناديق (BOXR × BOXC)
+    if(BOXR > 1 && (r+1) % BOXR === 0 && r < SIDE-1){
+      el.style.borderBottom = "2px solid var(--ink)";
+    }
+    if(BOXC > 1 && (c+1) % BOXC === 0 && c < SIDE-1){
+      el.style.borderRight = "2px solid var(--ink)";
+    }
+  });
+}
 /* ألوان صناديق */
 .cell[data-box="0"],.cell[data-box="8"]{background-image:linear-gradient(145deg, rgba(39,201,63,.10), rgba(39,201,63,.04))}
 .cell[data-box="1"],.cell[data-box="7"]{background-image:linear-gradient(145deg, rgba(255,204,0,.10), rgba(255,204,0,.04))}
