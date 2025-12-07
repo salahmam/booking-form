@@ -1,149 +1,215 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIRELO 3D Logo</title>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-<style>
-    body {
-        margin: 0;
-        height: 100vh;
-        background: #ffffff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.4s ease;
+}
 
-    .wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+/* الخلفيات */
+body.bg-white {
+  background-color: #ffffff;
+}
 
-    svg {
-        width: 280px;
-        overflow: visible;
-    }
+body.bg-black {
+  background-color: #050607;
+}
 
-    /* ====== 3D GOLD LAYERS ====== */
+body.bg-transparent {
+  /* شكل مربعات لتعطي إحساس الشفافية */
+  background-image: linear-gradient(45deg, #dcdcdc 25%, transparent 25%),
+    linear-gradient(-45deg, #dcdcdc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #dcdcdc 75%),
+    linear-gradient(-45deg, transparent 75%, #dcdcdc 75%);
+  background-size: 32px 32px;
+  background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
+}
 
-    .back {
-        stroke: #b58300;      /* ظل غامق */
-        stroke-width: 28;
-        fill: none;
-        opacity: 0.65;
-        filter: blur(2px);
-    }
+.app {
+  width: min(900px, 100%);
+  padding: 24px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(6px);
+}
 
-    .mid {
-        stroke: #d4a017;     /* ذهبي متوسط */
-        stroke-width: 20;
-        fill: none;
-        opacity: 0.9;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
+body.bg-black .app {
+  background: rgba(255, 255, 255, 0.04);
+}
 
-    .front {
-        stroke: url(#gold3D);   /* ذهبي فاتح */
-        stroke-width: 12;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+body.bg-transparent .app {
+  background: rgba(255, 255, 255, 0.08);
+}
 
-        stroke-dasharray: 600;
-        stroke-dashoffset: 600;
-        animation: draw 2.2s ease forwards;
-    }
+.title {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: #222;
+}
 
-    @keyframes draw {
-        to { stroke-dashoffset: 0; }
-    }
+body.bg-black .title {
+  color: #f5f5f5;
+}
 
-    /* Shine */
-    .shine {
-        stroke: url(#shineGradient);
-        stroke-width: 16;
-        fill: none;
-        opacity: 0;
-        animation: shineFx 2s ease-in-out 2.2s forwards;
-    }
+#logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
 
-    @keyframes shineFx {
-        0% { opacity: 0; }
-        45% { opacity: 1; }
-        100% { opacity: 0; }
-    }
+/* حجم الشعار */
+#logo-svg {
+  width: min(420px, 90vw);
+  height: auto;
+  overflow: visible;
+  animation: logoFloat 5s ease-in-out infinite;
+}
 
-    /* ====== TEXT ====== */
-    .text {
-        font-family: "Poppins", sans-serif;
-        margin-top: 20px;
-        font-size: 48px;
-        letter-spacing: 10px;
-        color: #d4a017;
-        display: flex;
-    }
+@keyframes logoFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
 
-    .text span {
-        opacity: 0;
-        transform: translateY(12px);
-        animation: textIn 0.45s forwards;
-        animation-delay: calc(var(--i) * 0.20s + 2.4s);
-    }
+/* أنيميشن الحروف واحد واحد */
+.letter {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: letterIn 0.5s ease-out forwards;
+}
 
-    @keyframes textIn {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-</head>
+.letter-1 {
+  animation-delay: 0.45s;
+}
+.letter-2 {
+  animation-delay: 0.6s;
+}
+.letter-3 {
+  animation-delay: 0.75s;
+}
+.letter-4 {
+  animation-delay: 0.9s;
+}
+.letter-5 {
+  animation-delay: 1.05s;
+}
+.letter-6 {
+  animation-delay: 1.2s;
+}
 
-<body>
+@keyframes letterIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-<div class="wrap">
+/* أدوات التحكم */
+.controls {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    <!-- SVG 3D GOLD V -->
-    <svg viewBox="0 0 200 200">
+.bg-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
 
-        <defs>
-            <!-- Bright Gold Gradient -->
-            <linearGradient id="gold3D" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fff4c2"/>
-                <stop offset="40%" stop-color="#f4d255"/>
-                <stop offset="100%" stop-color="#c69017"/>
-            </linearGradient>
+.bg-switcher span {
+  color: #333;
+}
 
-            <!-- Shine -->
-            <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="50%" stop-color="#f5d98a"/>
-                <stop offset="100%" stop-color="#ffffff"/>
-            </linearGradient>
-        </defs>
+body.bg-black .bg-switcher span,
+body.bg-black .hint {
+  color: #f5f5f5;
+}
 
-        <!-- 3D layers -->
-        <path class="back"  d="M30 20 L100 160 L170 20" />
-        <path class="mid"   d="M30 20 L100 160 L170 20" />
-        <path class="front" d="M30 20 L100 160 L170 20" />
-        <path class="shine" d="M30 20 L100 160 L170 20" />
+.bg-btn {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  background: #f1f1f1;
+  color: #333;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
 
-    </svg>
+body.bg-black .bg-btn {
+  background: #222;
+  color: #f5f5f5;
+}
 
-    <!-- TEXT -->
-    <div class="text">
-        <span style="--i:1">V</span>
-        <span style="--i:2">I</span>
-        <span style="--i:3">R</span>
-        <span style="--i:4">E</span>
-        <span style="--i:5">L</span>
-        <span style="--i:6">O</span>
-    </div>
+.bg-btn:hover {
+  transform: translateY(-1px);
+  background: #e0e0e0;
+}
 
-</div>
+.bg-btn.active {
+  background: #f5b01f;
+  color: #000;
+}
 
-</body>
-</html>
+.download-btn {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f7d36c, #f0a51d);
+  color: #402300;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.hint {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* موبايل */
+@media (max-width: 600px) {
+  .app {
+    border-radius: 0;
+  }
+  .controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
