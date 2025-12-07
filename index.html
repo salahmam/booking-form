@@ -1,480 +1,352 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <title>VIRELO Logo Animator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>VIRELO Logo Showcase</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #05070b;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f5f5f5;
-    }
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    .app {
-      width: 100%;
-      max-width: 1100px;
-      padding: 24px;
-    }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.4s ease, color 0.4s ease;
+      }
 
-    .card {
-      background: radial-gradient(circle at top, #15192a, #05070b 55%);
-      border-radius: 24px;
-      padding: 24px 24px 32px;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-    }
+      /* الثيمات (الخلفيات) */
+      body.theme-dark {
+        background: radial-gradient(circle at top, #222 0, #000 55%, #000 100%);
+        color: #f9f9f9;
+      }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
+      body.theme-light {
+        background: #ffffff;
+        color: #111;
+      }
 
-    .title-block h1 {
-      font-size: 24px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.9;
-    }
+      /* خلفية شفافة = خلفية مربعات مثل الفوتوشوب */
+      body.theme-transparent {
+        background-image:
+          linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+          linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+          linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+        background-size: 40px 40px;
+        background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+        color: #111;
+      }
 
-    .title-block p {
-      font-size: 13px;
-      opacity: 0.65;
-    }
+      .shell {
+        width: min(900px, 95vw);
+        text-align: center;
+      }
 
-    .badge {
-      padding: 6px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 215, 128, 0.4);
-      font-size: 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, rgba(255, 215, 128, 0.2), rgba(84, 61, 24, 0.1));
-      white-space: nowrap;
-    }
+      .title {
+        margin-bottom: 18px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 14px;
+        opacity: 0.85;
+      }
 
-    .badge-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: radial-gradient(circle, #ffd86a, #ff9f1c);
-      box-shadow: 0 0 10px rgba(255, 204, 102, 0.8);
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    select {
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 11, 19, 0.9);
-      color: #f5f5f5;
-      font-size: 13px;
-      outline: none;
-    }
-
-    button {
-      border: none;
-      cursor: pointer;
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-      white-space: nowrap;
-    }
-
-    button:active {
-      transform: scale(0.97);
-      box-shadow: none;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #ffd86a, #ff9f1c);
-      color: #2a1904;
-      box-shadow: 0 10px 30px rgba(255, 173, 66, 0.55);
-      font-weight: 600;
-    }
-
-    .btn-primary:hover {
-      box-shadow: 0 14px 40px rgba(255, 173, 66, 0.75);
-    }
-
-    .btn-ghost {
-      background: rgba(12, 14, 24, 0.8);
-      color: #f5f5f5;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-    }
-
-    .hint {
-      font-size: 11px;
-      opacity: 0.6;
-      margin-top: 4px;
-    }
-
-    .canvas-wrapper {
-      margin-top: 16px;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background-image: linear-gradient(45deg, #161925 25%, #11131c 25%, #11131c 50%, #161925 50%, #161925 75%, #11131c 75%, #11131c 100%);
-      background-size: 32px 32px; /* يظهر فقط عندما الخلفية شفافة */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    canvas {
-      width: 100%;
-      max-width: 640px;
-      height: auto;
-      display: block;
-    }
-
-    @media (max-width: 640px) {
       .card {
-        padding: 18px 14px 24px;
+        position: relative;
+        border-radius: 26px;
+        padding: 32px 20px 26px;
+        backdrop-filter: blur(20px);
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow:
+          0 30px 70px rgba(0, 0, 0, 0.6),
+          0 0 0 1px rgba(255, 255, 255, 0.03);
       }
-      .title-block h1 {
-        font-size: 20px;
+
+      body.theme-light .card {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 18px 45px rgba(0, 0, 0, 0.18),
+          0 0 0 1px rgba(0, 0, 0, 0.02);
       }
+
+      body.theme-transparent .card {
+        background: rgba(255, 255, 255, 0.85);
+        border-color: rgba(0, 0, 0, 0.05);
+        box-shadow:
+          0 18px 45px rgba(0, 0, 0, 0.35),
+          0 0 0 1px rgba(255, 255, 255, 0.4);
+      }
+
+      /* منطقة اللوغو */
+      .logo-wrap {
+        position: relative;
+        display: inline-block;
+        padding: 26px 34px;
+        border-radius: 22px;
+        overflow: visible;
+        animation: float 5s ease-in-out infinite;
+      }
+
+      .logo-glow {
+        position: absolute;
+        inset: -20px;
+        border-radius: inherit;
+        background: radial-gradient(
+          circle at 50% 0,
+          rgba(255, 215, 128, 0.3),
+          transparent 60%
+        );
+        filter: blur(10px);
+        opacity: 0;
+        animation: glowPulse 3.2s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .logo-inner {
+        position: relative;
+        border-radius: 20px;
+        padding: 18px 22px;
+        background: radial-gradient(
+            circle at top,
+            rgba(255, 255, 255, 0.2),
+            transparent 55%
+          ),
+          rgba(0, 0, 0, 0.65);
+        box-shadow:
+          0 30px 60px rgba(0, 0, 0, 0.9),
+          0 0 0 1px rgba(255, 255, 255, 0.06);
+        transform-origin: center;
+        animation: logoPulse 2.8s ease-in-out infinite;
+      }
+
+      body.theme-light .logo-inner {
+        background: radial-gradient(
+            circle at top,
+            rgba(255, 255, 255, 1),
+            rgba(255, 255, 255, 0.8)
+          ),
+          #ffffff;
+        box-shadow:
+          0 24px 45px rgba(0, 0, 0, 0.18),
+          0 0 0 1px rgba(0, 0, 0, 0.04);
+      }
+
+      body.theme-transparent .logo-inner {
+        background: radial-gradient(
+            circle at top,
+            rgba(255, 255, 255, 0.9),
+            rgba(255, 255, 255, 0.7)
+          ),
+          rgba(255, 255, 255, 0.85);
+      }
+
+      .logo-inner img {
+        display: block;
+        height: min(260px, 40vh); /* تكبير/تصغير اللوغو من هنا */
+        width: auto;
+        image-rendering: auto;
+        filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.7));
+        animation: breathing 3.2s ease-in-out infinite;
+      }
+
+      .logo-inner:hover img {
+        animation-play-state: paused; /* إذا تحب توقف الأنميشن عند الوقوف علي */
+      }
+
+      /* الأزرار */
       .controls {
-        flex-direction: column;
-        align-items: flex-start;
+        margin-top: 26px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="card">
-      <div class="header">
-        <div class="title-block">
-          <h1>VIRELO</h1>
-          <p>Animated premium gold logo – suitable for your SMM website.</p>
+
+      button,
+      .download-link {
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.06);
+        color: inherit;
+        cursor: pointer;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 500;
+        transition: background 0.2s ease, transform 0.12s ease,
+          box-shadow 0.2s ease, border-color 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      body.theme-light button,
+      body.theme-light .download-link,
+      body.theme-transparent button,
+      body.theme-transparent .download-link {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.12);
+      }
+
+      button:hover,
+      .download-link:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+      }
+
+      body.theme-light button:hover,
+      body.theme-light .download-link:hover,
+      body.theme-transparent button:hover,
+      body.theme-transparent .download-link:hover {
+        background: rgba(0, 0, 0, 0.06);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+      }
+
+      button[data-theme].active {
+        background: #f5c14f;
+        color: #000;
+        border-color: #f5c14f;
+        box-shadow:
+          0 14px 32px rgba(0, 0, 0, 0.45),
+          0 0 0 1px rgba(0, 0, 0, 0.12);
+      }
+
+      .hint {
+        margin-top: 12px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          opacity: 0.05;
+          transform: scale(0.96);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(1.06);
+        }
+      }
+
+      @keyframes logoPulse {
+        0%,
+        100% {
+          transform: scale(1) rotate(0deg);
+        }
+        25% {
+          transform: scale(1.02) rotate(-0.5deg);
+        }
+        50% {
+          transform: scale(1.04) rotate(0.6deg);
+        }
+        75% {
+          transform: scale(1.02) rotate(-0.4deg);
+        }
+      }
+
+      @keyframes breathing {
+        0%,
+        100% {
+          transform: scale(1);
+          filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.7));
+        }
+        50% {
+          transform: scale(1.04);
+          filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.9));
+        }
+      }
+
+      @media (max-width: 600px) {
+        .card {
+          padding: 22px 14px 20px;
+        }
+
+        .logo-inner img {
+          height: min(210px, 38vh);
+        }
+      }
+    </style>
+  </head>
+
+  <body class="theme-dark">
+    <div class="shell">
+      <div class="title">VIRELO • PREMIUM LOGO ANIMATION</div>
+
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="logo-glow"></div>
+
+          <div class="logo-inner">
+            <!-- 🟡 ضع هنا صورة الشعار الأصلية -->
+            <!-- غيّر اسم الملف إذا عندك اسم مختلف -->
+            <img src="virelo-logo.png" alt="VIRELO Logo" />
+          </div>
         </div>
-        <div class="badge">
-          <span class="badge-dot"></span>
-          شعار متحرك – عالي الدقة
+
+        <div class="controls">
+          <!-- تغيير الخلفية -->
+          <button type="button" data-theme="dark" class="active">
+            خلفية سوداء
+          </button>
+          <button type="button" data-theme="light">
+            خلفية بيضاء
+          </button>
+          <button type="button" data-theme="transparent">
+            خلفية شفافة
+          </button>
+
+          <!-- تحميل الصورة -->
+          <a href="virelo-v.png" download="VIRELO-logo.png" class="download-link">
+            ⬇ تحميل الشعار (PNG)
+          </a>
         </div>
-      </div>
 
-      <div class="controls">
-        <div class="control-group">
-          الخلفية:
-          <select id="bg-select">
-            <option value="dark">سوداء</option>
-            <option value="white">بيضاء</option>
-            <option value="transparent">شفافة (PNG)</option>
-          </select>
-        </div>
-
-        <button id="download-png" class="btn-primary">
-          ⬇️ تحميل صورة PNG
-        </button>
-
-        <button id="record-video" class="btn-ghost">
-          🎥 تسجيل فيديو قصير WEBM
-        </button>
-      </div>
-      <div class="hint">
-        ⚠️ ملاحظة: الفيديو يُحفظ عادة بصيغة <b>WEBM</b> (يمكن تحويله لاحقاً إلى MP4 ببرامج خارجية).
-      </div>
-
-      <div class="canvas-wrapper" id="canvas-wrapper">
-        <canvas id="logo-canvas" width="800" height="800"></canvas>
+        <p class="hint">
+          ملاحظة: إذا تريد فيديو أنيميشن، أسهل شيء تسوي تسجيل شاشة قصير للموقع
+          بدقّة عالية (4K أو 1080p) وبعدين تقصّ المقطع.
+        </p>
       </div>
     </div>
-  </div>
 
-  <script>
-    const canvas = document.getElementById("logo-canvas");
-    const ctx = canvas.getContext("2d");
-    const bgSelect = document.getElementById("bg-select");
-    const wrapper = document.getElementById("canvas-wrapper");
-    const downloadBtn = document.getElementById("download-png");
-    const recordBtn = document.getElementById("record-video");
+    <script>
+      const buttons = document.querySelectorAll("button[data-theme]");
+      const body = document.body;
 
-    let currentBg = "dark"; // dark | white | transparent
-    let startTime = null;
-    let recording = false;
-    let mediaRecorder = null;
-    let recordedChunks = [];
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const theme = btn.getAttribute("data-theme");
 
-    bgSelect.addEventListener("change", (e) => {
-      currentBg = e.target.value;
-      updateWrapperBackground();
-    });
+          body.classList.remove("theme-dark", "theme-light", "theme-transparent");
+          body.classList.add(`theme-${theme}`);
 
-    function updateWrapperBackground() {
-      if (currentBg === "transparent") {
-        // إظهار مربعات الخلفية
-        wrapper.style.backgroundImage =
-          "linear-gradient(45deg, #161925 25%, #11131c 25%, #11131c 50%, #161925 50%, #161925 75%, #11131c 75%, #11131c 100%)";
-      } else if (currentBg === "white") {
-        wrapper.style.backgroundImage = "none";
-        wrapper.style.backgroundColor = "#f5f5f5";
-      } else {
-        wrapper.style.backgroundImage = "none";
-        wrapper.style.backgroundColor = "#05070b";
-      }
-    }
-
-    // دالة ترسم V ثلاثية الأبعاد تقريباً
-    function drawLogo(time) {
-      const t = time / 1000; // بالثواني
-      const w = canvas.width;
-      const h = canvas.height;
-      const cx = w / 2;
-      const cy = h / 2 - 40;
-
-      // خلفية
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      if (currentBg === "dark") {
-        const bgGrad = ctx.createRadialGradient(
-          cx,
-          cy - 200,
-          40,
-          cx,
-          cy,
-          w * 0.9
-        );
-        bgGrad.addColorStop(0, "#141723");
-        bgGrad.addColorStop(1, "#05070b");
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, w, h);
-      } else if (currentBg === "white") {
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, w, h);
-      } else {
-        // transparent: لا نملأ خلفية
-      }
-
-      // أنيميشن بسيط (تنفس + دوران خفيف)
-      const breathe = 1 + 0.04 * Math.sin(t * 2.2); // تكبير/تصغير بسيط
-      const tilt = 0.08 * Math.sin(t * 1.5);        // ميلان خفيف
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.scale(breathe, breathe);
-      ctx.rotate(tilt);
-
-      // رسم اللمعان تحت الـ V
-      const glowGrad = ctx.createRadialGradient(0, 120, 10, 0, 120, 170);
-      glowGrad.addColorStop(0, "rgba(255, 200, 120, 0.5)");
-      glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.ellipse(0, 150, 210, 65, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // إعداد الألوان الذهبية (ثلاثي الأبعاد تقريبا)
-      const goldGradLeft = ctx.createLinearGradient(-50, -200, 40, 240);
-      goldGradLeft.addColorStop(0.0, "#fff3c2");
-      goldGradLeft.addColorStop(0.25, "#ffd77a");
-      goldGradLeft.addColorStop(0.5, "#f4b740");
-      goldGradLeft.addColorStop(0.75, "#d38a24");
-      goldGradLeft.addColorStop(1.0, "#7a4a10");
-
-      const goldGradRight = ctx.createLinearGradient(50, -200, -40, 240);
-      goldGradRight.addColorStop(0.0, "#fff3c2");
-      goldGradRight.addColorStop(0.25, "#ffd77a");
-      goldGradRight.addColorStop(0.5, "#f4b740");
-      goldGradRight.addColorStop(0.75, "#d38a24");
-      goldGradRight.addColorStop(1.0, "#7a4a10");
-
-      // سماكة الخط
-      const thickness = 90;
-      const topY = -220;
-      const bottomY = 200;
-
-      // الجانب الأيسر للـ V (بوليغون يقترب من اللوغو الأصلي)
-      ctx.beginPath();
-      ctx.moveTo(-220, topY);
-      ctx.lineTo(-170, topY);
-      ctx.lineTo(-15, bottomY);
-      ctx.lineTo(-85, bottomY);
-      ctx.closePath();
-      ctx.fillStyle = goldGradLeft;
-      ctx.fill();
-
-      // الجانب الأيمن
-      ctx.beginPath();
-      ctx.moveTo(220, topY);
-      ctx.lineTo(170, topY);
-      ctx.lineTo(15, bottomY);
-      ctx.lineTo(85, bottomY);
-      ctx.closePath();
-      ctx.fillStyle = goldGradRight;
-      ctx.fill();
-
-      // حافة لامعة في منتصف الـ V (edge)
-      ctx.beginPath();
-      ctx.moveTo(-30, bottomY - 5);
-      ctx.lineTo(30, bottomY - 5);
-      ctx.lineTo(170, topY + 15);
-      ctx.lineTo(150, topY + 30);
-      ctx.lineTo(0, bottomY + 25);
-      ctx.lineTo(-150, topY + 30);
-      ctx.lineTo(-170, topY + 15);
-      ctx.closePath();
-      const edgeGrad = ctx.createLinearGradient(0, topY, 0, bottomY + 40);
-      edgeGrad.addColorStop(0.0, "rgba(255,255,255,0.85)");
-      edgeGrad.addColorStop(0.3, "rgba(255,230,150,0.9)");
-      edgeGrad.addColorStop(0.7, "rgba(210,140,50,0.9)");
-      edgeGrad.addColorStop(1.0, "rgba(110,60,20,0.9)");
-      ctx.fillStyle = edgeGrad;
-      ctx.fill();
-
-      // توهج بنفسجي خفيف في نقطة تقاطع الـ V
-      const purpleGlow = ctx.createRadialGradient(0, bottomY - 15, 4, 0, bottomY - 15, 60);
-      purpleGlow.addColorStop(0, "rgba(180, 120, 255, 0.8)");
-      purpleGlow.addColorStop(1, "rgba(50, 20, 90, 0)");
-      ctx.fillStyle = purpleGlow;
-      ctx.beginPath();
-      ctx.arc(0, bottomY - 15, 60, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-
-      // رسم النص VIRELO أسفل الشعار
-      ctx.save();
-      ctx.translate(cx, cy + 210);
-
-      const text = "VIRELO";
-      ctx.font = "bold 78px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI'";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // تحديد شكل النص
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = currentBg === "white" ? "rgba(120, 80, 25, 0.85)" : "rgba(0,0,0,0.75)";
-
-      const textGrad = ctx.createLinearGradient(-160, 0, 160, 0);
-      textGrad.addColorStop(0.0, "#fff3c2");
-      textGrad.addColorStop(0.25, "#ffd77a");
-      textGrad.addColorStop(0.55, "#f4b740");
-      textGrad.addColorStop(0.8, "#d38a24");
-      textGrad.addColorStop(1.0, "#7a4a10");
-
-      ctx.fillStyle = textGrad;
-
-      // ظل بسيط
-      ctx.shadowColor = "rgba(0,0,0,0.55)";
-      ctx.shadowBlur = 18;
-      ctx.shadowOffsetY = 6;
-      ctx.fillText(text, 0, 0);
-
-      ctx.shadowColor = "transparent";
-      ctx.strokeText(text, 0, 0);
-
-      ctx.restore();
-    }
-
-    function animate(timestamp) {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      drawLogo(elapsed);
-      requestAnimationFrame(animate);
-    }
-
-    requestAnimationFrame(animate);
-    updateWrapperBackground();
-
-    // تحميل صورة PNG
-    downloadBtn.addEventListener("click", () => {
-      const link = document.createElement("a");
-      link.download = "virelo-logo.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    });
-
-    // تسجيل فيديو قصير (حوالي 4 ثواني)
-    recordBtn.addEventListener("click", () => {
-      if (recording) return;
-      if (!("MediaRecorder" in window) || !canvas.captureStream) {
-        alert("متصفحك لا يدعم تسجيل الفيديو مباشرة من اللوغو. استخدم برنامج تسجيل شاشة كبديل.");
-        return;
-      }
-
-      try {
-        const stream = canvas.captureStream(60); // 60 إطار/ثانية
-        mediaRecorder = new MediaRecorder(stream, {
-          mimeType: "video/webm;codecs=vp9"
+          buttons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
         });
-
-        recordedChunks = [];
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data && e.data.size > 0) {
-            recordedChunks.push(e.data);
-          }
-        };
-
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(recordedChunks, { type: "video/webm" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.style.display = "none";
-          a.href = url;
-          a.download = "virelo-logo-animation.webm";
-          document.body.appendChild(a);
-          a.click();
-          URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          recordBtn.textContent = "🎥 تسجيل فيديو قصير WEBM";
-          recording = false;
-        };
-
-        mediaRecorder.start();
-        recording = true;
-        recordBtn.textContent = "⏺️ جارٍ التسجيل…";
-
-        // نسجل تقريباً 4 ثواني
-        setTimeout(() => {
-          if (mediaRecorder && mediaRecorder.state === "recording") {
-            mediaRecorder.stop();
-          }
-        }, 4000);
-      } catch (err) {
-        console.error(err);
-        alert("حدث خطأ أثناء محاولة التسجيل. من الأفضل استخدام تسجيل الشاشة كبديل.");
-        recording = false;
-        recordBtn.textContent = "🎥 تسجيل فيديو قصير WEBM";
-      }
-    });
-  </script>
-</body>
+      });
+    </script>
+  </body>
 </html>
