@@ -2,175 +2,341 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <title>VIRELO Logo</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>VIRELO Logo Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- خط بسيط ونظيف -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold: #f4c23b;
+      --gold-deep: #d69b1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #000;
+      color: #fff;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .sub {
+      font-size: 14px;
+      opacity: 0.7;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+
+    button span.dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    button[data-bg="bg-white"] span.dot { background: #fff; }
+    button[data-bg="bg-black"] span.dot { background: #000; }
+    button[data-bg="bg-transparent"] span.dot {
+      background-image:
+        linear-gradient(45deg,#ccc 25%,transparent 25%,transparent 75%,#ccc 75%,#ccc),
+        linear-gradient(45deg,#ccc 25%,transparent 25%,transparent 75%,#ccc 75%,#ccc);
+      background-size: 8px 8px;
+      background-position: 0 0, 4px 4px;
+    }
+
+    button:hover {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+    }
+
+    button.active {
+      background: var(--gold-deep);
+      border-color: var(--gold);
+    }
+
+    .preview-shell {
+      padding: 16px;
+      border-radius: 24px;
+      background: radial-gradient(circle at top, #333 0, #000 60%);
+      box-shadow:
+        0 18px 45px rgba(0,0,0,0.65),
+        0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    /* الخلفيات الثلاث */
+    .preview-wrapper {
+      width: min(420px, 90vw);
+      height: min(420px, 90vw);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s;
+    }
+
+    .bg-white   { background: #ffffff; }
+    .bg-black   { background: #000000; }
+    .bg-transparent {
+      background-image:
+        linear-gradient(45deg,#565656 25%,transparent 25%,transparent 75%,#565656 75%,#565656),
+        linear-gradient(45deg,#565656 25%,transparent 25%,transparent 75%,#565656 75%,#565656);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+
+    /* منطقة الالتقاط (للتصدير) */
+    #capture-area {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .logo-stack img {
+      max-width: 260px;
+      width: 70%;
+      height: auto;
+      display: block;
+      animation: float 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 12px 25px rgba(0,0,0,0.5));
+    }
+
+    /* أنيميشن تحريك الشعار */
+    @keyframes float {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* اسم VIRELO – يتكتب بحروف متحركة */
+    .brand-name {
+      display: flex;
+      gap: 6px;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #222;
+    }
+
+    .bg-black .brand-name {
+      color: #f8f8f8;
+    }
+
+    .bg-transparent .brand-name {
+      color: #f1f1f1;
+      text-shadow: 0 0 10px rgba(0,0,0,0.9);
+    }
+
+    .brand-letter {
+      opacity: 0;
+      transform: translateY(16px);
+      color: var(--gold-deep);
+      text-shadow:
+        0 0 10px rgba(0,0,0,0.6),
+        0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .brand-letter.show {
+      opacity: 1;
+      transform: translateY(0);
+      transition: 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .download-note {
+      font-size: 11px;
+      opacity: 0.65;
+      text-align: center;
+      max-width: 360px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 480px) {
+      .brand-name {
+        font-size: 22px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
-<body class="bg-white">
+
+<body>
   <div class="app">
-    <h1 class="title">VIRELO Animated Logo</h1>
-
-    <!-- حاوية الشعار -->
-    <div id="logo-wrapper">
-      <!-- SVG الشعار -->
-      <svg id="logo-svg"
-           viewBox="0 0 600 600"
-           xmlns="http://www.w3.org/2000/svg">
-
-        <!-- تعريفات التدرجات والظلال -->
-        <defs>
-          <!-- تدرج ذهبي للحرف V -->
-          <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ffe58f" />
-            <stop offset="40%" stop-color="#f5c643" />
-            <stop offset="70%" stop-color="#d89b1f" />
-            <stop offset="100%" stop-color="#b77a12" />
-          </linearGradient>
-
-          <!-- تدرج ظل خفيف -->
-          <linearGradient id="shadowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="rgba(0,0,0,0.4)" />
-            <stop offset="100%" stop-color="rgba(0,0,0,0)" />
-          </linearGradient>
-
-          <!-- تدرج ذهبي للنص -->
-          <linearGradient id="goldText" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffe9a6" />
-            <stop offset="50%" stop-color="#f0c54a" />
-            <stop offset="100%" stop-color="#c08d1a" />
-          </linearGradient>
-
-          <!-- فلتر توهج خفيف -->
-          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="10" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <!-- ظل خفيف تحت الشعار (لإحساس 3D) -->
-        <ellipse cx="300" cy="360" rx="180" ry="36"
-                 fill="url(#shadowGradient)"
-                 opacity="0.45">
-          <animate attributeName="opacity"
-                   values="0.25;0.5;0.25"
-                   dur="4s"
-                   repeatCount="indefinite" />
-        </ellipse>
-
-        <!-- حرف V (كأنه شريط ذهبي ثلاثي الأبعاد) -->
-        <!-- الجزء الأيسر من الشريط -->
-        <path id="v-left"
-              d="M 150 110
-                 C 210 110, 230 140, 250 210
-                 L 305 395
-                 C 265 380, 240 345, 225 310
-                 L 150 110 Z"
-              fill="url(#goldGradient)"
-              filter="url(#softGlow)">
-          <!-- أنيميشن دخول خفيف -->
-          <animateTransform attributeName="transform"
-                            type="translate"
-                            from="0,-40"
-                            to="0,0"
-                            dur="0.9s"
-                            fill="freeze" />
-        </path>
-
-        <!-- الجزء الأيمن من الشريط -->
-        <path id="v-right"
-              d="M 450 110
-                 C 390 110, 370 140, 350 210
-                 L 295 395
-                 C 335 380, 360 345, 375 310
-                 L 450 110 Z"
-              fill="url(#goldGradient)"
-              filter="url(#softGlow)">
-          <animateTransform attributeName="transform"
-                            type="translate"
-                            from="0,-40"
-                            to="0,0"
-                            dur="0.9s"
-                            begin="0.05s"
-                            fill="freeze" />
-        </path>
-
-        <!-- لمعة بسيطة في منتصف الـ V -->
-        <path d="M 245 210
-                 C 275 260, 325 260, 355 210
-                 L 305 395 Z"
-              fill="rgba(255,255,255,0.22)">
-          <animate attributeName="opacity"
-                   values="0.1;0.35;0.1"
-                   dur="3.5s"
-                   repeatCount="indefinite" />
-        </path>
-
-        <!-- حدود (stroke) لرسم V كأنها تُكتب -->
-        <path id="v-outline"
-              d="M 150 110
-                 C 210 110, 230 140, 250 210
-                 L 305 395
-                 L 350 210
-                 C 370 140, 390 110, 450 110"
-              fill="none"
-              stroke="#fff6c9"
-              stroke-width="6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-dasharray="650"
-              stroke-dashoffset="650">
-          <animate attributeName="stroke-dashoffset"
-                   from="650" to="0"
-                   dur="1.2s"
-                   begin="0.1s"
-                   fill="freeze" />
-          <animate attributeName="opacity"
-                   from="1" to="0"
-                   dur="0.7s"
-                   begin="1.2s"
-                   fill="freeze" />
-        </path>
-
-        <!-- النص: VIRELO -->
-        <g id="logo-text" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-           font-size="80"
-           font-weight="600"
-           letter-spacing="18"
-           fill="url(#goldText)"
-           transform="translate(0, 40)">
-
-          <!-- كل حرف منفصل لأنيميشن متسلسلة -->
-          <text x="160" y="470" class="letter letter-1">V</text>
-          <text x="222" y="470" class="letter letter-2">I</text>
-          <text x="264" y="470" class="letter letter-3">R</text>
-          <text x="336" y="470" class="letter letter-4">E</text>
-          <text x="408" y="470" class="letter letter-5">L</text>
-          <text x="462" y="470" class="letter letter-6">O</text>
-        </g>
-      </svg>
+    <div style="text-align:center">
+      <h1>VIRELO</h1>
+      <div class="sub">Interactive Logo • Background & Export</div>
     </div>
 
-    <!-- أدوات التحكم -->
+    <!-- أزرار اختيار الخلفية -->
     <div class="controls">
-      <div class="bg-switcher">
-        <span>الخلفية:</span>
-        <button data-bg="white" class="bg-btn active">أبيض</button>
-        <button data-bg="black" class="bg-btn">أسود</button>
-        <button data-bg="transparent" class="bg-btn">شفافة</button>
-      </div>
-
-      <button id="download-btn" class="download-btn">
-        تحميل الشعار (PNG)
+      <button class="active" data-bg="bg-white">
+        <span class="dot"></span> خلفية بيضاء
+      </button>
+      <button data-bg="bg-black">
+        <span class="dot"></span> خلفية سوداء
+      </button>
+      <button data-bg="bg-transparent">
+        <span class="dot"></span> خلفية شفافة (شبكة)
       </button>
     </div>
 
-    <p class="hint">
-      ✨ يمكن رفع هذا الملف مباشرة على GitHub Pages ليعمل كصفحة عرض للشعار.
-    </p>
+    <!-- المعاينة -->
+    <div class="preview-shell">
+      <div class="preview-wrapper bg-white" id="preview">
+        <div id="capture-area">
+          <div class="logo-stack">
+            <!-- شعار V (استبدل المسار إذا غيرت اسم الملف) -->
+            <img src="virelo-v.png" alt="VIRELO Logo" />
+
+            <!-- اسم VIRELO بحروف متحركة -->
+            <div class="brand-name" id="brand-name">
+              <!-- الحروف تنضاف بالدالة في الجافاسكربت -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- أزرار التحميل -->
+    <div class="controls">
+      <button id="download-png">
+        ⬇️ تحميل صورة PNG
+      </button>
+    </div>
+
+    <div class="download-note">
+      ملاحظة: لتحميل فيديو متحرك للشعار، يمكنك تصوير الشاشة
+      (Screen Recorder) أثناء الحركة، أو تصديره لاحقاً من برنامج مونتاج.
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- html2canvas من الـ CDN للتصدير كصورة -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    // 1) أنيميشن كتابة VIRELO حرف حرف
+    const brandNameEl = document.getElementById("brand-name");
+    const brandText = "VIRELO";
+    const letters = [];
+
+    for (let i = 0; i < brandText.length; i++) {
+      const span = document.createElement("span");
+      span.className = "brand-letter";
+      span.textContent = brandText[i];
+      brandNameEl.appendChild(span);
+      letters.push(span);
+    }
+
+    function playTyping() {
+      letters.forEach((span, index) => {
+        span.classList.remove("show");
+        setTimeout(() => {
+          span.classList.add("show");
+        }, 120 * index);
+      });
+    }
+
+    // تشغيل الكتابة عند الدخول ومرة كل فترة بسيطة
+    playTyping();
+    setInterval(playTyping, 3500);
+
+    // 2) تغيير الخلفية
+    let currentBgClass = "bg-white";
+    const preview = document.getElementById("preview");
+    const bgButtons = document.querySelectorAll("button[data-bg]");
+
+    bgButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const bg = btn.getAttribute("data-bg");
+        currentBgClass = bg;
+
+        // إزالة الكلاسات القديمة
+        preview.classList.remove("bg-white","bg-black","bg-transparent");
+        preview.classList.add(bg);
+
+        bgButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    // 3) تحميل صورة PNG حسب الخلفية الحالية
+    document.getElementById("download-png").addEventListener("click", async () => {
+      const captureArea = document.getElementById("capture-area");
+
+      let bgColor = null;
+      if (currentBgClass === "bg-white") bgColor = "#ffffff";
+      if (currentBgClass === "bg-black") bgColor = "#000000";
+      if (currentBgClass === "bg-transparent") bgColor = null; // شفاف
+
+      const canvas = await html2canvas(captureArea, {
+        backgroundColor: bgColor,
+        scale: 3, // دقة عالية
+      });
+
+      const link = document.createElement("a");
+      const date = new Date().toISOString().slice(0,10);
+      link.download = `VIRELO-logo-${currentBgClass}-${date}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  </script>
 </body>
 </html>
