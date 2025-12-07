@@ -1,215 +1,70 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+// تغيير الخلفية
+const bgButtons = document.querySelectorAll(".bg-btn");
+const body = document.body;
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.4s ease;
-}
+bgButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    bgButtons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
 
-/* الخلفيات */
-body.bg-white {
-  background-color: #ffffff;
-}
+    const bg = btn.dataset.bg;
+    body.classList.remove("bg-white", "bg-black", "bg-transparent");
+    if (bg === "white") body.classList.add("bg-white");
+    if (bg === "black") body.classList.add("bg-black");
+    if (bg === "transparent") body.classList.add("bg-transparent");
+  });
+});
 
-body.bg-black {
-  background-color: #050607;
-}
+// تحميل الشعار كـ PNG
+const downloadBtn = document.getElementById("download-btn");
+const logoSvg = document.getElementById("logo-svg");
 
-body.bg-transparent {
-  /* شكل مربعات لتعطي إحساس الشفافية */
-  background-image: linear-gradient(45deg, #dcdcdc 25%, transparent 25%),
-    linear-gradient(-45deg, #dcdcdc 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #dcdcdc 75%),
-    linear-gradient(-45deg, transparent 75%, #dcdcdc 75%);
-  background-size: 32px 32px;
-  background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
-}
+downloadBtn.addEventListener("click", () => {
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(logoSvg);
 
-.app {
-  width: min(900px, 100%);
-  padding: 24px;
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.03);
-  backdrop-filter: blur(6px);
-}
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
 
-body.bg-black .app {
-  background: rgba(255, 255, 255, 0.04);
-}
+  const img = new Image();
+  img.onload = () => {
+    const scale = 3; // دقة عالية
+    const width = logoSvg.viewBox.baseVal.width * scale;
+    const height = logoSvg.viewBox.baseVal.height * scale;
 
-body.bg-transparent .app {
-  background: rgba(255, 255, 255, 0.08);
-}
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
 
-.title {
-  text-align: center;
-  margin-bottom: 16px;
-  font-size: 1.5rem;
-  color: #222;
-}
+    // خلفية حسب الوضع الحالي
+    if (body.classList.contains("bg-white")) {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+    } else if (body.classList.contains("bg-black")) {
+      ctx.fillStyle = "#050607";
+      ctx.fillRect(0, 0, width, height);
+    }
+    // إذا شفافة لا نرسم خلفية
 
-body.bg-black .title {
-  color: #f5f5f5;
-}
+    ctx.drawImage(img, 0, 0, width, height);
 
-#logo-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
-}
+    canvas.toBlob((blob) => {
+      const pngUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = pngUrl;
+      a.download = "VIRELO-logo.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(pngUrl);
+      URL.revokeObjectURL(url);
+    }, "image/png");
+  };
 
-/* حجم الشعار */
-#logo-svg {
-  width: min(420px, 90vw);
-  height: auto;
-  overflow: visible;
-  animation: logoFloat 5s ease-in-out infinite;
-}
+  img.onerror = () => {
+    alert("حدث خطأ أثناء توليد الصورة، جرّب تحديث الصفحة.");
+  };
 
-@keyframes logoFloat {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-/* أنيميشن الحروف واحد واحد */
-.letter {
-  opacity: 0;
-  transform: translateY(18px);
-  animation: letterIn 0.5s ease-out forwards;
-}
-
-.letter-1 {
-  animation-delay: 0.45s;
-}
-.letter-2 {
-  animation-delay: 0.6s;
-}
-.letter-3 {
-  animation-delay: 0.75s;
-}
-.letter-4 {
-  animation-delay: 0.9s;
-}
-.letter-5 {
-  animation-delay: 1.05s;
-}
-.letter-6 {
-  animation-delay: 1.2s;
-}
-
-@keyframes letterIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* أدوات التحكم */
-.controls {
-  margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.bg-switcher {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-}
-
-.bg-switcher span {
-  color: #333;
-}
-
-body.bg-black .bg-switcher span,
-body.bg-black .hint {
-  color: #f5f5f5;
-}
-
-.bg-btn {
-  border: none;
-  padding: 6px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  background: #f1f1f1;
-  color: #333;
-  transition: background 0.2s ease, transform 0.1s ease;
-}
-
-body.bg-black .bg-btn {
-  background: #222;
-  color: #f5f5f5;
-}
-
-.bg-btn:hover {
-  transform: translateY(-1px);
-  background: #e0e0e0;
-}
-
-.bg-btn.active {
-  background: #f5b01f;
-  color: #000;
-}
-
-.download-btn {
-  border: none;
-  padding: 8px 16px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #f7d36c, #f0a51d);
-  color: #402300;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.download-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-}
-
-.hint {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  color: #555;
-}
-
-/* موبايل */
-@media (max-width: 600px) {
-  .app {
-    border-radius: 0;
-  }
-  .controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+  img.src = url;
+});
