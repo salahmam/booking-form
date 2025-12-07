@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIRELO Animated Logo</title>
+<title>VIRELO 3D Logo</title>
 
 <style>
     body {
@@ -13,70 +13,84 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        font-family: 'Poppins', sans-serif;
     }
 
-    .logo-wrapper {
+    .wrap {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    /* ====== SVG ANIMATION ====== */
     svg {
         width: 280px;
         overflow: visible;
     }
 
-    .stroke {
-        stroke: #d4a017;
-        stroke-width: 18;
+    /* ====== 3D GOLD LAYERS ====== */
+
+    .back {
+        stroke: #b58300;      /* ظل غامق */
+        stroke-width: 28;
+        fill: none;
+        opacity: 0.65;
+        filter: blur(2px);
+    }
+
+    .mid {
+        stroke: #d4a017;     /* ذهبي متوسط */
+        stroke-width: 20;
+        fill: none;
+        opacity: 0.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .front {
+        stroke: url(#gold3D);   /* ذهبي فاتح */
+        stroke-width: 12;
         fill: none;
         stroke-linecap: round;
         stroke-linejoin: round;
+
         stroke-dasharray: 600;
         stroke-dashoffset: 600;
-        animation: drawV 2.2s ease forwards;
+        animation: draw 2.2s ease forwards;
     }
 
-    @keyframes drawV {
-        to {
-            stroke-dashoffset: 0;
-        }
+    @keyframes draw {
+        to { stroke-dashoffset: 0; }
     }
 
-    /* GOLDEN SHINE EFFECT */
+    /* Shine */
     .shine {
-        stroke: url(#gold-gradient);
-        stroke-width: 18;
+        stroke: url(#shineGradient);
+        stroke-width: 16;
         fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
         opacity: 0;
-        animation: shineMove 2s ease-in-out 2.2s forwards;
+        animation: shineFx 2s ease-in-out 2.2s forwards;
     }
 
-    @keyframes shineMove {
+    @keyframes shineFx {
         0% { opacity: 0; }
-        50% { opacity: 1; }
+        45% { opacity: 1; }
         100% { opacity: 0; }
     }
 
-    /* ====== TEXT ANIMATION ====== */
-    .virelo-text {
+    /* ====== TEXT ====== */
+    .text {
+        font-family: "Poppins", sans-serif;
         margin-top: 20px;
         font-size: 48px;
-        letter-spacing: 8px;
-        font-weight: 600;
+        letter-spacing: 10px;
         color: #d4a017;
         display: flex;
     }
 
-    .virelo-text span {
+    .text span {
         opacity: 0;
-        transform: translateY(10px);
-        animation: textIn 0.4s forwards;
-        animation-delay: calc(var(--i) * 0.18s + 2.3s);
+        transform: translateY(12px);
+        animation: textIn 0.45s forwards;
+        animation-delay: calc(var(--i) * 0.20s + 2.4s);
     }
 
     @keyframes textIn {
@@ -90,28 +104,37 @@
 
 <body>
 
-<div class="logo-wrapper">
+<div class="wrap">
 
-    <!-- ====== GOLDEN V - SVG DRAWING ====== -->
+    <!-- SVG 3D GOLD V -->
     <svg viewBox="0 0 200 200">
-        <!-- Gold gradient -->
+
         <defs>
-            <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f8e38f"/>
-                <stop offset="50%" stop-color="#d4a017"/>
-                <stop offset="100%" stop-color="#b8860b"/>
+            <!-- Bright Gold Gradient -->
+            <linearGradient id="gold3D" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fff4c2"/>
+                <stop offset="40%" stop-color="#f4d255"/>
+                <stop offset="100%" stop-color="#c69017"/>
+            </linearGradient>
+
+            <!-- Shine -->
+            <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="50%" stop-color="#f5d98a"/>
+                <stop offset="100%" stop-color="#ffffff"/>
             </linearGradient>
         </defs>
 
-        <!-- Main V outline (draw animation) -->
-        <path class="stroke" d="M30 20 L100 160 L170 20" />
-
-        <!-- Shine overlay -->
+        <!-- 3D layers -->
+        <path class="back"  d="M30 20 L100 160 L170 20" />
+        <path class="mid"   d="M30 20 L100 160 L170 20" />
+        <path class="front" d="M30 20 L100 160 L170 20" />
         <path class="shine" d="M30 20 L100 160 L170 20" />
+
     </svg>
 
-    <!-- ====== TEXT ANIMATION ====== -->
-    <div class="virelo-text">
+    <!-- TEXT -->
+    <div class="text">
         <span style="--i:1">V</span>
         <span style="--i:2">I</span>
         <span style="--i:3">R</span>
