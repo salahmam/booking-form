@@ -3,73 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIRELO Logo Animation</title>
+<title>VIRELO Animated Logo</title>
 
 <style>
     body {
         margin: 0;
-        padding: 0;
-        background: #ffffff; /* خلفية بيضاء */
+        height: 100vh;
+        background: #ffffff;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
         font-family: 'Poppins', sans-serif;
     }
 
-    .logo-container {
+    .logo-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 15px;
     }
 
-    /* حركة ظهور اللوغو */
-    .logo-icon {
-        width: 200px; 
+    /* ====== SVG ANIMATION ====== */
+    svg {
+        width: 280px;
+        overflow: visible;
+    }
+
+    .stroke {
+        stroke: #d4a017;
+        stroke-width: 18;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 600;
+        stroke-dashoffset: 600;
+        animation: drawV 2.2s ease forwards;
+    }
+
+    @keyframes drawV {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    /* GOLDEN SHINE EFFECT */
+    .shine {
+        stroke: url(#gold-gradient);
+        stroke-width: 18;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
         opacity: 0;
-        transform: scale(0.7);
-        animation: pop 0.8s ease-out forwards;
+        animation: shineMove 2s ease-in-out 2.2s forwards;
     }
 
-    @keyframes pop {
-        0% { transform: scale(0.7); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
+    @keyframes shineMove {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
     }
 
-    /* كتابة حروف VIRELO بالتدريج */
-    .logo-text {
-        display: flex;
-        gap: 8px;
+    /* ====== TEXT ANIMATION ====== */
+    .virelo-text {
+        margin-top: 20px;
         font-size: 48px;
+        letter-spacing: 8px;
         font-weight: 600;
-        letter-spacing: 4px;
-        color: #d4a017; /* الذهبي */
+        color: #d4a017;
+        display: flex;
     }
 
-    .logo-text span {
+    .virelo-text span {
         opacity: 0;
         transform: translateY(10px);
-        animation: showLetter 0.5s ease-out forwards;
-        animation-delay: calc(var(--i) * 0.15s);
+        animation: textIn 0.4s forwards;
+        animation-delay: calc(var(--i) * 0.18s + 2.3s);
     }
 
-    @keyframes showLetter {
-        0% { opacity: 0; transform: translateY(10px); }
-        100% { opacity: 1; transform: translateY(0); }
+    @keyframes textIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 </head>
 
 <body>
 
-<div class="logo-container">
+<div class="logo-wrapper">
 
-    <!-- ضع هنا صورة اللوغو -->
-    <img src="0099200F-7869-4604-95B7-D84C6530ABF5.png" class="logo-icon" alt="VIRELO Logo" />
+    <!-- ====== GOLDEN V - SVG DRAWING ====== -->
+    <svg viewBox="0 0 200 200">
+        <!-- Gold gradient -->
+        <defs>
+            <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f8e38f"/>
+                <stop offset="50%" stop-color="#d4a017"/>
+                <stop offset="100%" stop-color="#b8860b"/>
+            </linearGradient>
+        </defs>
 
-    <!-- كتابة VIRELO حرف حرف -->
-    <div class="logo-text">
+        <!-- Main V outline (draw animation) -->
+        <path class="stroke" d="M30 20 L100 160 L170 20" />
+
+        <!-- Shine overlay -->
+        <path class="shine" d="M30 20 L100 160 L170 20" />
+    </svg>
+
+    <!-- ====== TEXT ANIMATION ====== -->
+    <div class="virelo-text">
         <span style="--i:1">V</span>
         <span style="--i:2">I</span>
         <span style="--i:3">R</span>
